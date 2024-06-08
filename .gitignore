@@ -51,3 +51,5 @@ __pycache__
 /Backend/mocap.py
 /Assets/*.mp4
 /Assets/Satomi 3d - Anime Style
+.vs
+Temp

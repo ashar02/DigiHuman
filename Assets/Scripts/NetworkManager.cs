@@ -172,7 +172,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         postForm.AddBinaryData("file",localFile.bytes,localFileName,"text/plain");
 
         UnityWebRequest www = UnityWebRequest.Post(url, postForm);
-        
+        www.certificateHandler = new BypassCertificateValidation();
+
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.Loading,true);
         yield return www.SendWebRequest();
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.Loading,false);
@@ -423,6 +424,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             webRequest.downloadHandler = (DownloadHandler) new DownloadHandlerBuffer();
             webRequest.SetRequestHeader("Content-Type", "application/json");
             webRequest.SetRequestHeader("cache-control", "no-cache");
+            webRequest.certificateHandler = new BypassCertificateValidation();
 
             yield return webRequest.SendWebRequest();
             try
@@ -470,5 +472,14 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     {
         Debug.Log(serverResponse);
         yield break;
+    }
+}
+
+public class BypassCertificateValidation : CertificateHandler
+{
+    protected override bool ValidateCertificate(byte[] certificateData)
+    {
+        // Always return true to bypass validation
+        return true;
     }
 }

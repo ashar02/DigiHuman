@@ -233,6 +233,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             webRequest.downloadHandler = (DownloadHandler) new DownloadHandlerBuffer();
             webRequest.SetRequestHeader("Content-Type", "application/json");
             webRequest.SetRequestHeader("cache-control", "no-cache");
+            webRequest.certificateHandler = new BypassCertificateValidation();
 
             yield return webRequest.SendWebRequest();
             try

@@ -399,7 +399,7 @@ public class Pose3DMapper : CharacterMapper
         Vector3 lEar = bodyPartVectors[(int) BodyPoints.LeftEar].position;
         var head = jointPoints[(int) BodyPoints.Head];
         Vector3 normal = nose.TriangleNormal(rEar, lEar);
-        head.Transform.rotation = Quaternion.LookRotation(gaze, normal) * head.InverseRotation;
+        //head.Transform.rotation = Quaternion.LookRotation(gaze, normal) * head.InverseRotation;
         
         
         // rotate each of bones

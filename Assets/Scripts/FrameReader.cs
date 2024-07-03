@@ -182,7 +182,8 @@ public class FrameReader : MonoBehaviour
         estimatedHandPose = new List<HandJsonVector>();
         frameData = new List<FrameData>();
         characterRotation = character.transform.rotation;
-        SetBodyZoomCamera();
+        //SetBodyZoomCamera();
+        SetFaceZoomCamera();
         videoPlayer.Prepare();
         videoPlayer.Play();
         videoPlayer.frame = 0;

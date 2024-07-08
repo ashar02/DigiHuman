@@ -170,6 +170,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         WWWForm postForm = new WWWForm();
 
         postForm.AddBinaryData("file",localFile.bytes,localFileName,"text/plain");
+        postForm.AddField("text", "this is test message");
 
         UnityWebRequest www = UnityWebRequest.Post(url, postForm);
         www.certificateHandler = new BypassCertificateValidation();

@@ -289,15 +289,12 @@ public class Pose3DMapper : CharacterMapper
 
     private void UpdateNormalMode(BodyPartVector[] bodyPartVectors)
     {
-
         for (int i = 0; i < bodyPartVectors.Length; i++)
         {
-            if(bodyPartVectors[i].visibility > 0.2f)
+            if (bodyPartVectors[i].visibility > 0.2f)
                 jointPoints[i].LandmarkPose = bodyPartVectors[i].position;
         }
-        
-        //setting position of each bone
-        // jointPoints[(int) BodyPoints.Spine].Transform.position = bodyPartVectors[(int) BodyPoints.Spine].position;
+
         jointPoints[(int) BodyPoints.Hips].Transform.position = bodyPartVectors[(int) BodyPoints.Hips].position;
 
         for (int i = 0; i < jointPoints.Length && i < bodyPartVectors.Length; i++)
@@ -308,49 +305,42 @@ public class Pose3DMapper : CharacterMapper
                 bone.WorldPos = bone.Transform.position;
         }
 
-
-
         for (int i = 0; i < jointPoints.Length && i < bodyPartVectors.Length; i++)
         {
             JointPoint bone = jointPoints[i];
-            
+
+            // Skip legs and feet joints
+            if ((i >= (int)BodyPoints.LeftHip && i <= (int)BodyPoints.RightFootIndex) || 
+                i == (int)BodyPoints.LeftKnee || i == (int)BodyPoints.RightKnee || 
+                i == (int)BodyPoints.LeftAnkle || i == (int)BodyPoints.RightAnkle ||
+                i == (int)BodyPoints.LeftHeel || i == (int)BodyPoints.RightHeel)
+            {
+                continue;
+            }
+
             if (bone.Child != null)
             {
-                if (bone.Child.Transform != null) 
+                if (bone.Child.Transform != null)
                 {
                     JointPoint child = bone.Child;
                     float distance = bone.DistanceFromChild;
                     Vector3 direction = (-bone.LandmarkPose + child.LandmarkPose) / (-bone.LandmarkPose + child.LandmarkPose).magnitude;
                     child.WorldPos = bone.Transform.position + direction * distance;
-                    // child.Transform.position = child.WorldPos;
-//                    Debug.Log(distance + "  " + Vector3.Distance(child.Transform.position,bone.Transform.position));
                 }
-            }
-            else
-            {
-                // if(i == (int) BodyPoints.RightShoulder || i == (int) BodyPoints.LeftShoulder || 
-                //    i == (int) BodyPoints.LeftHip || i== (int) BodyPoints.RightHip || i == (int) BodyPoints.Head || i== (int) BodyPoints.Neck)
-                //     continue;
-                // if (jointPoints[i].Transform != null)
-                // {
-                //     if(bodyPartVectors[i].visibility > 0.75f)
-                //         jointPoints[i].Transform.position = bodyPartVectors[i].position;
-                // }
             }
         }
 
-
-        if(enableKalmanFilter)
+        if (enableKalmanFilter)
             for (int i = 0; i < jointPoints.Length; i++)
             {
-                if(jointPoints[i].Transform != null)
+                if (jointPoints[i].Transform != null)
                     KalmanUpdate(jointPoints[i]);
             }
         else
         {
             for (int i = 0; i < jointPoints.Length; i++)
             {
-                    jointPoints[i].FilteredPos = jointPoints[i].WorldPos;
+                jointPoints[i].FilteredPos = jointPoints[i].WorldPos;
             }
         }
 
@@ -367,8 +357,6 @@ public class Pose3DMapper : CharacterMapper
             }
         }
 
-
-        //setting hip & spine rotation
         Vector3 a = bodyPartVectors[(int) BodyPoints.RightHip].position;
         Vector3 spine = bodyPartVectors[(int) BodyPoints.Spine].position;
         Vector3 hip = bodyPartVectors[(int) BodyPoints.Hips].position;
@@ -378,82 +366,84 @@ public class Pose3DMapper : CharacterMapper
         Vector3 hipsUpward = spine - hip;
         Vector3 spineUpward = bodyPartVectors[(int) BodyPoints.Neck].position - spine;
         jointPoints[(int) BodyPoints.Hips].Transform.rotation = Quaternion.LookRotation(spine.TriangleNormal(c, a),
-                                                                   hipsUpward ) *
+                                                                hipsUpward) *
                                                                 jointPoints[(int) BodyPoints.Hips].InverseRotation;
 
         jointPoints[(int) BodyPoints.Spine].Transform.rotation = Quaternion.LookRotation(spine.TriangleNormal(d, e),
-                                                                     spineUpward ) *
+                                                                    spineUpward) *
                                                                 jointPoints[(int) BodyPoints.Spine].InverseRotation;
 
-        
-        // Head Rotation
         Vector3 mouth = (bodyPartVectors[(int) BodyPoints.LeftMouth].position +
-                         bodyPartVectors[(int) BodyPoints.RightMouth].position)/2.0f;
+                        bodyPartVectors[(int) BodyPoints.RightMouth].position) / 2.0f;
         Vector3 lEye = bodyPartVectors[(int) BodyPoints.LeftEye].position;
         Vector3 rEye = bodyPartVectors[(int) BodyPoints.RightEye].position;
-                
+
         var gaze = lEye.TriangleNormal(mouth, rEye);
-        
+
         Vector3 nose = bodyPartVectors[(int) BodyPoints.Nose].position;
         Vector3 rEar = bodyPartVectors[(int) BodyPoints.RightEar].position;
         Vector3 lEar = bodyPartVectors[(int) BodyPoints.LeftEar].position;
         var head = jointPoints[(int) BodyPoints.Head];
         Vector3 normal = nose.TriangleNormal(rEar, lEar);
-        //head.Transform.rotation = Quaternion.LookRotation(gaze, normal) * head.InverseRotation;
-        
-        
-        // rotate each of bones
+
         Vector3 forward = jointPoints[(int) BodyPoints.Hips].Transform.forward;
-        
         Vector3 leftHip = jointPoints[(int) BodyPoints.LeftHip].FilteredPos;
         Vector3 rightHip = jointPoints[(int) BodyPoints.RightHip].FilteredPos;
-        forward = jointPoints[(int) BodyPoints.Spine].FilteredPos.TriangleNormal(leftHip,rightHip);
+        forward = jointPoints[(int) BodyPoints.Spine].FilteredPos.TriangleNormal(leftHip, rightHip);
 
-        
+        int jointIndex = 0;
         foreach (var jointPoint in jointPoints)
         {
-            if(jointPoint == null)
+            if (jointPoint == null)
                 continue;
-            
+
+            if ((jointIndex >= (int)BodyPoints.LeftHip && jointIndex <= (int)BodyPoints.RightFootIndex) ||
+                jointIndex == (int)BodyPoints.LeftKnee || jointIndex == (int)BodyPoints.RightKnee ||
+                jointIndex == (int)BodyPoints.LeftAnkle || jointIndex == (int)BodyPoints.RightAnkle ||
+                jointIndex == (int)BodyPoints.LeftHeel || jointIndex == (int)BodyPoints.RightHeel)
+            {
+                jointIndex++;
+                continue;
+            }
+
             if (jointPoint.Parent != null)
             {
                 Vector3 fv = jointPoint.Parent.FilteredPos - jointPoint.FilteredPos;
-                jointPoint.Transform.rotation = 
-                    Quaternion.LookRotation(jointPoint.FilteredPos- jointPoint.Child.FilteredPos, fv) 
-                    * jointPoint.InverseRotation;
+                jointPoint.Transform.rotation =
+                    Quaternion.LookRotation(jointPoint.FilteredPos - jointPoint.Child.FilteredPos, fv) *
+                    jointPoint.InverseRotation;
             }
             else if (jointPoint.Child != null)
             {
-                jointPoint.Transform.rotation = 
-                    Quaternion.LookRotation((jointPoint.FilteredPos- jointPoint.Child.FilteredPos).normalized, forward)
-                    * jointPoint.InverseRotation;
+                jointPoint.Transform.rotation =
+                    Quaternion.LookRotation((jointPoint.FilteredPos - jointPoint.Child.FilteredPos).normalized, forward) *
+                    jointPoint.InverseRotation;
             }
             continue;
-            
-            if (jointPoint.Parent != null)
-            {
-                Vector3 fv = jointPoint.Parent.Transform.position - jointPoint.Transform.position;
-                jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, fv) * jointPoint.InverseRotation;
-            }
-            else if (jointPoint.Child != null)
-            {
-                jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, forward) * jointPoint.InverseRotation;
-            }
-            continue;
-            if (jointPoint.Parent != null)
-            {
-                var fv = jointPoint.Parent.Transform.position - jointPoint.Transform.position;
-                jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, fv);
-            }
-            else if (jointPoint.Child != null)
-            {
-                jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, forward);
-            }
+            // if (jointPoint.Parent != null)
+            // {
+            //     Vector3 fv = jointPoint.Parent.Transform.position - jointPoint.Transform.position;
+            //     jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, fv) * jointPoint.InverseRotation;
+            // }
+            // else if (jointPoint.Child != null)
+            // {
+            //     jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, forward) * jointPoint.InverseRotation;
+            // }
+            // continue;
+            // if (jointPoint.Parent != null)
+            // {
+            //     var fv = jointPoint.Parent.Transform.position - jointPoint.Transform.position;
+            //     jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, fv);
+            // }
+            // else if (jointPoint.Child != null)
+            // {
+            //     jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Transform.position- jointPoint.Child.Transform.position, forward);
+            // }
+            jointIndex++;
         }
 
-        
         //Calculate feet rotation
-        Vector3 r_ankle = bodyPartVectors[(int) BodyPoints.RightAnkle].position;
+        /*Vector3 r_ankle = bodyPartVectors[(int) BodyPoints.RightAnkle].position;
         Vector3 r_toe = bodyPartVectors[(int) BodyPoints.RightFootIndex].position;
         Vector3 r_knee = bodyPartVectors[(int) BodyPoints.RightKnee].position;
         
@@ -469,41 +459,9 @@ public class Pose3DMapper : CharacterMapper
         JointPoint l_ankleT = jointPoints[(int) BodyPoints.LeftAnkle];
         l_ankleT.Transform.rotation = 
             Quaternion.LookRotation(l_ankle - l_toe, l_knee - l_ankle) 
-            * l_ankleT.InverseRotation;
-
-
-        // for (int i = 0; i < jointPoints.Length && i < bodyPartVectors.Length; i++)
-        // {
-        //     JointPoint bone = jointPoints[i];
-        //
-        //     if (bone.Child != null)
-        //     {
-        //         if (bone.Child.Transform != null)
-        //         {
-        //             JointPoint child = bone.Child;
-        //             child.Transform.position = child.WorldPos;
-        //         }
-        //     }
-        // }
-        // Vector3 a1 = bodyPartVectors[(int) BodyPoints.Nose].position;
-        // Vector3 b1 = bodyPartVectors[(int) BodyPoints.RightEar].position;
-        // Vector3 c1 = bodyPartVectors[(int) BodyPoints.LeftHip].position;
-        // float yDegree = Vector3.Angle(b1.TriangleNormal(a1, c1), Vector3.up);
-        // var head = jointPoints[(int) BodyPoints.Head];
-        // Vector3 headAngle = head.Transform.eulerAngles;
-        // headAngle.y = yDegree;
-        // head.Transform.eulerAngles = headAngle;
-        
-        // Vector3 a1 = bodyPartVectors[(int) BodyPoints.RightEye].position;
-        // Vector3 b1 = bodyPartVectors[(int) BodyPoints.LeftEye].position;
-        // Vector3 c1 = (bodyPartVectors[(int) BodyPoints.LeftMouth].position + bodyPartVectors[(int) BodyPoints.RightMouth].position);
-        // float yDegree = Vector3.Angle(c1.TriangleNormal(a1, b1), Vector3.forward);
-        // var head = jointPoints[(int) BodyPoints.Head];
-        // Vector3 headAngle = head.Transform.eulerAngles;
-        // headAngle.y = -yDegree;
-        // head.Transform.eulerAngles = headAngle;
-        //jointPoints[(int) BodyPoints.Hips].Transform.position = characterPlacement;
+            * l_ankleT.InverseRotation;*/
     }
+
 
     //placing and rotating bones with the help of IK algorithm
     private void UpdateModeIK(BodyPartVector[] bodyPartVectors)

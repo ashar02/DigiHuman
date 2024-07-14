@@ -412,9 +412,11 @@ public class Pose3DMapper : CharacterMapper
                if (!isVerticalAdjustmentApplied)
                {
                   isVerticalAdjustmentApplied = true;
-                  Vector3 elbowOffset = new Vector3(-0.03f, 0.08f, -0.03f); // Adjust as necessary
-                  jointPoints[(int)BodyPoints.RightElbow].Transform.position += elbowOffset;
-               }
+                  Vector3 rightElbowOffset = new Vector3(-0.03f, 0.08f, -0.03f); // Adjust as necessary
+                  jointPoints[(int)BodyPoints.RightElbow].Transform.position += rightElbowOffset;
+                  Vector3 leftElbowOffset = new Vector3(0.0f, 0.08f, -0.03f); // Adjust as necessary
+                  jointPoints[(int)BodyPoints.LeftElbow].Transform.position += leftElbowOffset;
+                }
             }
 
             if (jointPoint.Parent != null)

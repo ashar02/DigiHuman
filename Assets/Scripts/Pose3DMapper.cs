@@ -283,10 +283,8 @@ public class Pose3DMapper : CharacterMapper
         hips.position = characterPlacement.position;
 
     }
-    
-    
 
-
+    Boolean isVerticalAdjustmentApplied = false;
     private void UpdateNormalMode(BodyPartVector[] bodyPartVectors)
     {
         for (int i = 0; i < bodyPartVectors.Length; i++)
@@ -391,6 +389,8 @@ public class Pose3DMapper : CharacterMapper
         Vector3 rightHip = jointPoints[(int) BodyPoints.RightHip].FilteredPos;
         forward = jointPoints[(int) BodyPoints.Spine].FilteredPos.TriangleNormal(leftHip, rightHip);
 
+        //Vector3 elbowOffset = new Vector3(0, 0.00011f, 0.0001f); // Adjust as necessary
+        //jointPoints[(int)BodyPoints.RightElbow].Transform.position += elbowOffset;
         int jointIndex = 0;
         foreach (var jointPoint in jointPoints)
         {
@@ -406,6 +406,17 @@ public class Pose3DMapper : CharacterMapper
                 continue;
             }
 
+            
+            if (jointIndex == (int)BodyPoints.RightElbow)
+            {
+               if (!isVerticalAdjustmentApplied)
+               {
+                  isVerticalAdjustmentApplied = true;
+                  Vector3 elbowOffset = new Vector3(-0.03f, 0.08f, -0.03f); // Adjust as necessary
+                  jointPoints[(int)BodyPoints.RightElbow].Transform.position += elbowOffset;
+               }
+            }
+
             if (jointPoint.Parent != null)
             {
                 Vector3 fv = jointPoint.Parent.FilteredPos - jointPoint.FilteredPos;
@@ -419,6 +430,7 @@ public class Pose3DMapper : CharacterMapper
                     Quaternion.LookRotation((jointPoint.FilteredPos - jointPoint.Child.FilteredPos).normalized, forward) *
                     jointPoint.InverseRotation;
             }
+            jointIndex++;
             continue;
             // if (jointPoint.Parent != null)
             // {

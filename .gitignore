@@ -1,0 +1,55 @@
+*.sln
+/Library
+/Logs
+/.idea
+/Backend/.idea
+/Backend/json/*.json
+/Backend/Video
+/Backend/*.png
+/Backend/__pycache__
+/Assets/video.meta
+/Assets/video
+/obj
+/Assembly-CSharp.csproj
+/Assembly-CSharp-Editor.csproj
+__pycache__
+/Assets/RenderOutput
+/Backend/img
+/Backend/checkpoints/coco_pretrained/latest_net_G.pth
+/Backend/dataset/val_label/greyscale.png
+/Backend/dataset/val_inst/greyscale.png
+/Backend/dataset/val_img/greyscale.png
+/Assets/StreamingAssets
+/Backend/hand_json
+/Backend/json
+/Backend/data/shape_predictor_68_face_landmarks.dat
+/Assets/Images
+/Assets/Sketch
+/Assets/CharacterAnimation
+/Assets/Minimalistic Icons Pack
+/Assets/_Heathen Engineering
+/Assets/40+ Simple Icons - Free
+/Assets/Models/Materials
+/Assets/Models/Materials.meta
+/Assets/Models
+/Assets/CC_Resource
+/Assets/CC_Assets
+/Assets/40+ Simple Icons - Free.meta
+/Assets/CC_Assets.meta
+/Assets/CC_Resource.meta
+/Assets/Editor/CC_and_IC_Auto_Setup_for_HDRP.dll
+/Assets/Editor/CC_and_IC_Auto_Setup_for_HDRP.dll.meta
+/Assets/Minimalistic Icons Pack.meta
+/Assets/TutorialInfo.meta
+/Assets/TutorialInfo/Scripts.meta
+/Assets/TutorialInfo/Scripts/Editor.meta
+/Assets/TutorialInfo/Scripts/Editor/ReadmeEditor.cs
+/Assets/TutorialInfo/Scripts/Editor/ReadmeEditor.cs.meta
+/Assets/TutorialInfo/Scripts/Readme.cs
+/Assets/TutorialInfo/Scripts/Readme.cs.meta
+/Assets/_Heathen Engineering.meta
+/Backend/mocap.py
+/Assets/*.mp4
+/Assets/Satomi 3d - Anime Style
+.vs
+Temp

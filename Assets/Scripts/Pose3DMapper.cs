@@ -283,16 +283,21 @@ public class Pose3DMapper : CharacterMapper
         hips.position = characterPlacement.position;
 
     }
+    
+    
 
     Boolean isVerticalAdjustmentApplied = false;
     private void UpdateNormalMode(BodyPartVector[] bodyPartVectors)
     {
+
         for (int i = 0; i < bodyPartVectors.Length; i++)
         {
-            if (bodyPartVectors[i].visibility > 0.2f)
+            if(bodyPartVectors[i].visibility > 0.2f)
                 jointPoints[i].LandmarkPose = bodyPartVectors[i].position;
         }
-
+        
+        //setting position of each bone
+        // jointPoints[(int) BodyPoints.Spine].Transform.position = bodyPartVectors[(int) BodyPoints.Spine].position;
         jointPoints[(int) BodyPoints.Hips].Transform.position = bodyPartVectors[(int) BodyPoints.Hips].position;
 
         for (int i = 0; i < jointPoints.Length && i < bodyPartVectors.Length; i++)
@@ -302,6 +307,8 @@ public class Pose3DMapper : CharacterMapper
             if (bone.Transform != null)
                 bone.WorldPos = bone.Transform.position;
         }
+
+
 
         for (int i = 0; i < jointPoints.Length && i < bodyPartVectors.Length; i++)
         {
@@ -318,27 +325,30 @@ public class Pose3DMapper : CharacterMapper
 
             if (bone.Child != null)
             {
-                if (bone.Child.Transform != null)
+                if (bone.Child.Transform != null) 
                 {
                     JointPoint child = bone.Child;
                     float distance = bone.DistanceFromChild;
                     Vector3 direction = (-bone.LandmarkPose + child.LandmarkPose) / (-bone.LandmarkPose + child.LandmarkPose).magnitude;
                     child.WorldPos = bone.Transform.position + direction * distance;
+                    // child.Transform.position = child.WorldPos;
+//                    Debug.Log(distance + "  " + Vector3.Distance(child.Transform.position,bone.Transform.position));
                 }
             }
         }
 
-        if (enableKalmanFilter)
+
+        if(enableKalmanFilter)
             for (int i = 0; i < jointPoints.Length; i++)
             {
-                if (jointPoints[i].Transform != null)
+                if(jointPoints[i].Transform != null)
                     KalmanUpdate(jointPoints[i]);
             }
         else
         {
             for (int i = 0; i < jointPoints.Length; i++)
             {
-                jointPoints[i].FilteredPos = jointPoints[i].WorldPos;
+                    jointPoints[i].FilteredPos = jointPoints[i].WorldPos;
             }
         }
 
@@ -355,6 +365,8 @@ public class Pose3DMapper : CharacterMapper
             }
         }
 
+
+        //setting hip & spine rotation
         Vector3 a = bodyPartVectors[(int) BodyPoints.RightHip].position;
         Vector3 spine = bodyPartVectors[(int) BodyPoints.Spine].position;
         Vector3 hip = bodyPartVectors[(int) BodyPoints.Hips].position;
@@ -364,37 +376,43 @@ public class Pose3DMapper : CharacterMapper
         Vector3 hipsUpward = spine - hip;
         Vector3 spineUpward = bodyPartVectors[(int) BodyPoints.Neck].position - spine;
         jointPoints[(int) BodyPoints.Hips].Transform.rotation = Quaternion.LookRotation(spine.TriangleNormal(c, a),
-                                                                hipsUpward) *
+                                                                   hipsUpward ) *
                                                                 jointPoints[(int) BodyPoints.Hips].InverseRotation;
 
         jointPoints[(int) BodyPoints.Spine].Transform.rotation = Quaternion.LookRotation(spine.TriangleNormal(d, e),
-                                                                    spineUpward) *
+                                                                     spineUpward ) *
                                                                 jointPoints[(int) BodyPoints.Spine].InverseRotation;
 
+        
+        // Head Rotation
         Vector3 mouth = (bodyPartVectors[(int) BodyPoints.LeftMouth].position +
-                        bodyPartVectors[(int) BodyPoints.RightMouth].position) / 2.0f;
+                         bodyPartVectors[(int) BodyPoints.RightMouth].position)/2.0f;
         Vector3 lEye = bodyPartVectors[(int) BodyPoints.LeftEye].position;
         Vector3 rEye = bodyPartVectors[(int) BodyPoints.RightEye].position;
-
+                
         var gaze = lEye.TriangleNormal(mouth, rEye);
-
+        
         Vector3 nose = bodyPartVectors[(int) BodyPoints.Nose].position;
         Vector3 rEar = bodyPartVectors[(int) BodyPoints.RightEar].position;
         Vector3 lEar = bodyPartVectors[(int) BodyPoints.LeftEar].position;
         var head = jointPoints[(int) BodyPoints.Head];
         Vector3 normal = nose.TriangleNormal(rEar, lEar);
-
+        //head.Transform.rotation = Quaternion.LookRotation(gaze, normal) * head.InverseRotation;
+        
+        
+        // rotate each of bones
         Vector3 forward = jointPoints[(int) BodyPoints.Hips].Transform.forward;
+        
         Vector3 leftHip = jointPoints[(int) BodyPoints.LeftHip].FilteredPos;
         Vector3 rightHip = jointPoints[(int) BodyPoints.RightHip].FilteredPos;
-        forward = jointPoints[(int) BodyPoints.Spine].FilteredPos.TriangleNormal(leftHip, rightHip);
+        forward = jointPoints[(int) BodyPoints.Spine].FilteredPos.TriangleNormal(leftHip,rightHip);
 
         //Vector3 elbowOffset = new Vector3(0, 0.00011f, 0.0001f); // Adjust as necessary
         //jointPoints[(int)BodyPoints.RightElbow].Transform.position += elbowOffset;
         int jointIndex = 0;
         foreach (var jointPoint in jointPoints)
         {
-            if (jointPoint == null)
+            if(jointPoint == null)
                 continue;
 
             if ((jointIndex >= (int)BodyPoints.LeftHip && jointIndex <= (int)BodyPoints.RightFootIndex) ||
@@ -475,7 +493,6 @@ public class Pose3DMapper : CharacterMapper
             Quaternion.LookRotation(l_ankle - l_toe, l_knee - l_ankle) 
             * l_ankleT.InverseRotation;*/
     }
-
 
     //placing and rotating bones with the help of IK algorithm
     private void UpdateModeIK(BodyPartVector[] bodyPartVectors)

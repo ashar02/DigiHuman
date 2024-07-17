@@ -97,6 +97,7 @@ public class Pose3DMapper : CharacterMapper
     private Vector3 distanceOffset;
     private JointPoint[] jointPoints;
     private GameObject[] jointsDebug;
+    private Boolean isVerticalAdjustmentApplied = false;
 
 
     protected override void InitializationHumanoidPose()
@@ -282,11 +283,11 @@ public class Pose3DMapper : CharacterMapper
         character.transform.rotation = characterPlacement.rotation;
         hips.position = characterPlacement.position;
 
+        isVerticalAdjustmentApplied = false;
     }
     
     
 
-    Boolean isVerticalAdjustmentApplied = false;
     private void UpdateNormalMode(BodyPartVector[] bodyPartVectors)
     {
 
@@ -439,9 +440,9 @@ public class Pose3DMapper : CharacterMapper
                if (!isVerticalAdjustmentApplied)
                {
                   isVerticalAdjustmentApplied = true;
-                  Vector3 rightElbowOffset = new Vector3(-0.03f, 0.08f, -0.03f); // Adjust as necessary
+                  Vector3 rightElbowOffset = new Vector3(-0.03f, 0.08f, 0.03f); // Adjust as necessary
                   jointPoints[(int)BodyPoints.RightElbow].Transform.position += rightElbowOffset;
-                  Vector3 leftElbowOffset = new Vector3(0.0f, 0.08f, -0.03f); // Adjust as necessary
+                  Vector3 leftElbowOffset = new Vector3(0.0f, 0.08f, 0.03f); // Adjust as necessary
                   jointPoints[(int)BodyPoints.LeftElbow].Transform.position += leftElbowOffset;
                 }
             }

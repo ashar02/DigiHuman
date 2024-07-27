@@ -57,9 +57,11 @@ public class BackgroundImageManager : MonoBehaviour
 
     public void SetLocalImageBackground()
     {
+        #if UNITY_EDITOR
         string path = FileManager.OpenFileImageExplorer();
         Sprite sprite = LoadNewSprite(path);
         SetBackgroundView(true, sprite);
+        #endif
     }
     
     private void SetBackgroundView(bool show, Sprite chosenGauGanSprite)

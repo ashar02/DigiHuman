@@ -95,6 +95,7 @@ public class FileManager : MonoBehaviour
         return frameData;
     }
 
+#if UNITY_EDITOR
     public static string OpenFileVideoExplorer()
     {
         return EditorUtility.OpenFilePanel("Hello", "","mp4");
@@ -103,6 +104,7 @@ public class FileManager : MonoBehaviour
     {
         return EditorUtility.OpenFilePanel("Hello", "","png");
     }
+#endif
 
     public static void RemoveFile(string path)
     {

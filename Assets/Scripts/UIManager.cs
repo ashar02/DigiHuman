@@ -180,8 +180,10 @@ public class UIManager : MonoSingleton<UIManager>
     {
         poseUploadCircleImage.color = Color.white;
         poseUploadCompleteImage.gameObject.SetActive(false);
+        #if UNITY_EDITOR
         string filePath = FileManager.OpenFileVideoExplorer();
         NetworkManager.Instancce.UploadAndEstimatePose(filePath);
+        #endif
     }
 
     public void OnPoseDataReceived()
@@ -195,9 +197,11 @@ public class UIManager : MonoSingleton<UIManager>
     {
         handPoseUploadCircleImage.color = Color.white;
         handPoseUploadCompleteImage.gameObject.SetActive(false);
+        #if UNITY_EDITOR
         string filePath = FileManager.OpenFileVideoExplorer();
         NetworkManager.Instancce.UploadAndEstimateHandPose(filePath);
         
+        #endif
     }
     
     public void OnHandPoseDataReceived()
@@ -215,9 +219,11 @@ public class UIManager : MonoSingleton<UIManager>
         poseUploadCircleImage.color = Color.white;
         handPoseUploadCompleteImage.gameObject.SetActive(false);
         poseUploadCompleteImage.gameObject.SetActive(false);
+        #if UNITY_EDITOR
         string filePath = FileManager.OpenFileVideoExplorer();
         NetworkManager.Instancce.UploadAndEstimateFullPose(filePath);
         
+        #endif
     }
     
     public void OnFullPoseDataReceived()
@@ -235,12 +241,14 @@ public class UIManager : MonoSingleton<UIManager>
     {
         faceUploadCircleImage.color = Color.white;
         faceUploadCompleteImage.gameObject.SetActive(false);
+        #if UNITY_EDITOR
         string filePath = FileManager.OpenFileVideoExplorer();
         NetworkManager.Instancce.UploadFaceMoacap(filePath,(() =>
         {
             frameReader.SetFaceOriginalVideo(filePath);
 
         }));
+        #endif
     }
     public void OnFaceDataReceived()
     {

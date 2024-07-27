@@ -3,9 +3,11 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using FFmpegOut;
+#if UNITY_EDITOR
 using UnityEditor.Recorder;
 using UnityEditor.Recorder.Input;
 using UnityEngine.XR.WSA.Input;
+#endif
 
 public class VideoCapture : MonoBehaviour
 {
@@ -13,7 +15,9 @@ public class VideoCapture : MonoBehaviour
     public static WebCamDevice webCamDevice;
     [SerializeField] private SpriteRenderer renderer;
     [SerializeField] private Camera recorderCamera;
+#if UNITY_EDITOR
     private CameraInput cameraInput;
+#endif
     private CameraCapture cameraCapture;
     private void Start()
     {

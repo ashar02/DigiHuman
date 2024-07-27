@@ -55,6 +55,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public int index;
     }
 
+#if UNITY_EDITOR
     private void Start()
     {
         if (enableDebug)
@@ -65,6 +66,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }));
         }
     }
+#endif
 
 
     //starting coroutine for sending ASync to server

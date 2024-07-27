@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -150,6 +152,7 @@ public class SlideShow : MonoBehaviour
     }
 }
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(SlideShow))]
 [CanEditMultipleObjects]
 public class LookAtPointEditor : Editor
@@ -183,3 +186,4 @@ public class LookAtPointEditor : Editor
 
 
 }
+#endif

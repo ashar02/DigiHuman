@@ -55,9 +55,29 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public int index;
     }
 
-#if UNITY_EDITOR
+    public bool commandLineTextReceived = false;
+
     private void Start()
     {
+        string text = null;
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int index = 0; index < args.Length; index++)
+        {
+            if (args[index] == "-text" && (index + 1) < args.Length)
+            {
+                text = args[index + 1];
+                break;
+            }
+        }
+        if (!string.IsNullOrEmpty(text))
+        {
+            commandLineTextReceived = true;
+            StartCoroutine(UploadText(text, serverFullPoseUploadURL, (response, bytes) =>
+            {
+                StartCoroutine(GetFullBodyPoseEstimates(response, bytes));
+            }));
+        }
+#if UNITY_EDITOR
         if (enableDebug)
         {
             StartCoroutine(Upload(filePath, serverFullPoseUploadURL, (response, bytes) =>
@@ -65,9 +85,19 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 StartCoroutine(GetFullBodyPoseEstimates(response,bytes));
             }));
         }
-    }
 #endif
+    }
 
+
+    //starting coroutine for sending ASync to server
+    public void UploadAndEstimateFullPoseUsingText(string text, Action onSuccess = null)
+    {
+        StartCoroutine(UploadText(text, serverFullPoseUploadURL, (response, bytes) =>
+        {
+            StartCoroutine(GetFullBodyPoseEstimates(response, bytes));
+            onSuccess?.Invoke();
+        })); //Get estimates }));
+    }
 
     //starting coroutine for sending ASync to server
     public void UploadImageGauGan(string localFileName,Action<UploadResponse,byte[]> onFinished)
@@ -125,6 +155,59 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     }
     
     
+    //Async file uploader method2
+    IEnumerator UploadText(string text, string url, Action<UploadResponse, byte[]> onFinishedUpload)
+    {
+        // WWW localFile = new WWW("file:///" + localFileName);
+        // yield return localFile;
+        // if (localFile.error == null)
+        //     Debug.Log("Loaded file successfully");
+        // else
+        // {
+        //     Debug.Log("Open file error: "+localFile.error);
+        //     yield break; // stop the coroutine here
+        // }
+        WWWForm postForm = new WWWForm();
+        //postForm.AddBinaryData("file",localFile.bytes,localFileName,"text/plain");
+        postForm.AddField("text", text);
+        UnityWebRequest www = UnityWebRequest.Post(url, postForm);
+        www.certificateHandler = new BypassCertificateValidation();
+        UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.Loading, true);
+        yield return www.SendWebRequest();
+        UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.Loading, false);
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(www.error);
+            UIManager.Instancce.ShowErrorMessage("Server Connection Failed!");
+        }
+        else
+        {
+            byte[] results = www.downloadHandler.data;
+            using (var stream = new MemoryStream(results))
+            using (var binaryStream = new BinaryReader(stream))
+            {
+                Debug.Log(results.Length);
+            }
+
+            Debug.Log(www.downloadHandler.text);
+            try
+            {
+                UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(www.downloadHandler.text);
+                onFinishedUpload(uploadResponse, results);
+            }
+            catch (Exception e)
+            {
+
+                onFinishedUpload((new UploadResponse()), results);
+                Console.WriteLine(e);
+                throw;
+            }
+            //sending response to the action method
+            Debug.Log("Upload complete!");
+        }
+    }
+
     //Async file uploader
     IEnumerator UploadFileCo(string localFileName, string uploadURL)
     {

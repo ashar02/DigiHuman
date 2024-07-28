@@ -228,12 +228,23 @@ public class UIManager : MonoSingleton<UIManager>
     
     public void OnFullPoseDataReceived()
     {
-        ShowSuccessMessage("Full pose data downloaded successfully!");
+        if (!NetworkManager.Instancce.commandLineTextReceived)
+        {
+            ShowSuccessMessage("Full pose data downloaded successfully!");
+        }
         handPoseUploadCircleImage.color = successDownloadColor;
         poseUploadCircleImage.color = successDownloadColor;
         handPoseUploadCompleteImage.gameObject.SetActive(true);
         poseUploadCompleteImage.gameObject.SetActive(true);
         frameReader.ArrangeDataFrames();
+        if (NetworkManager.Instancce.commandLineTextReceived)
+        {
+            frameReader.OnTogglePlay();
+            if (frameReader.pause)
+                animationPlayButton.image.sprite = resumeImage;
+            else
+                animationPlayButton.image.sprite = pauseImage;
+        }
     }
     
     

@@ -244,6 +244,7 @@ public class UIManager : MonoSingleton<UIManager>
                 animationPlayButton.image.sprite = resumeImage;
             else
                 animationPlayButton.image.sprite = pauseImage;
+            canvas.gameObject.SetActive(false);
         }
     }
     

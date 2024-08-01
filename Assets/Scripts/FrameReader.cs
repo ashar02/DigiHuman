@@ -591,6 +591,13 @@ public class FrameReader : MonoBehaviour
         videoPlayer.Pause();
         if(recording)
             StopRecording();
+        if (frameData.Count > 0 && currentAnimationSlot >= frameData.Count)
+        {
+            if (NetworkManager.Instancce.commandLineTextReceived)
+            {
+                Application.Quit();
+            }
+        }
     }
     
     // private void Update()

@@ -55,6 +55,22 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public int index;
     }
 
+    public static class JsonHelper
+    {
+        public static T[] FromJsonArray<T>(string json)
+        {
+            string newJson = "{ \"array\": " + json + "}";
+            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(newJson);
+            return wrapper.array;
+        }
+
+        [System.Serializable]
+        private class Wrapper<T>
+        {
+            public T[] array;
+        }
+    }
+
     public bool commandLineTextReceived = false;
 
     private void Start()
@@ -74,7 +90,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             commandLineTextReceived = true;
             StartCoroutine(UploadText(text, serverFullPoseUploadURL, (response, bytes) =>
             {
-                StartCoroutine(GetFullBodyPoseEstimates(response, bytes));
+                StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
             }));
         }
 #if UNITY_EDITOR
@@ -149,7 +165,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     {
         StartCoroutine(Upload(localFileName, serverFullPoseUploadURL, (response, bytes) =>
         {
-            StartCoroutine(GetFullBodyPoseEstimates(response,bytes));
+            StartCoroutine(GetFullBodyPoseEstimates(response,bytes,-1));
             onSuccess?.Invoke();
         })); //Get estimates }));
     }
@@ -489,10 +505,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     
     
     //getting estimates for video body & hand poses
-    IEnumerator GetFullBodyPoseEstimates(UploadResponse response, byte[] bytes)
+    IEnumerator GetFullBodyPoseEstimates(UploadResponse response, byte[] bytes, int start = 0)
     {
         PoseRequest poseRequest = new PoseRequest();
-        poseRequest.index = 0;
+        poseRequest.index = start;
         poseRequest.fileName = response.file;
         frameReader.SetVideoFractions(response.aspectRatio);
 
@@ -503,12 +519,13 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar,true);
         UIManager.Instancce.UpdateProgressBar(0);
 
-        while (true)
+        if (start == -1)
         {
+            // Fetch all frames at once
             UnityWebRequest webRequest = new UnityWebRequest(serverFullPoseEstimatorURL, "POST");
             byte[] encodedPayload = new System.Text.UTF8Encoding().GetBytes(JsonUtility.ToJson(poseRequest));
-            webRequest.uploadHandler = (UploadHandler) new UploadHandlerRaw(encodedPayload);
-            webRequest.downloadHandler = (DownloadHandler) new DownloadHandlerBuffer();
+            webRequest.uploadHandler = new UploadHandlerRaw(encodedPayload);
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
             webRequest.SetRequestHeader("Content-Type", "application/json");
             webRequest.SetRequestHeader("cache-control", "no-cache");
             webRequest.certificateHandler = new BypassCertificateValidation();
@@ -522,14 +539,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
                 else
                 {
-                    if (webRequest.downloadHandler.text.Equals("Done"))
-                        break;
-                    FullPoseJson receivedJson = JsonUtility.FromJson<FullPoseJson>(webRequest.downloadHandler.text);
-                    bodyJsons.Add(receivedJson.bodyPose);
-                    handJsons.Add(receivedJson.handsPose);
-                    Debug.Log(JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text).frame);
-                    poseRequest.index += 1;
-                    UIManager.Instancce.UpdateProgressBar(receivedJson.frame/totalFrames);
+                    string jsonResponse = webRequest.downloadHandler.text;
+                    //Debug.Log("JSON Response: " + jsonResponse);
+
+                    // Manually parse the JSON array
+                    FullPoseJson[] receivedJsonArray = JsonHelper.FromJsonArray<FullPoseJson>(jsonResponse);
+                    foreach (var poseJson in receivedJsonArray)
+                    {
+                        bodyJsons.Add(poseJson.bodyPose);
+                        handJsons.Add(poseJson.handsPose);
+                    }
+                    UIManager.Instancce.UpdateProgressBar(1);
                 }
             }
             catch (Exception e)
@@ -539,10 +559,51 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 UIManager.Instancce.ShowErrorMessage("Error in downloading Full Body Pose Data!");
                 throw;
             }
-
-            yield return null;
         }
-        UIManager.Instancce.UpdateProgressBar(1);
+        else
+        {
+            // Fetch frame by frame
+            while (true)
+            {
+                UnityWebRequest webRequest = new UnityWebRequest(serverFullPoseEstimatorURL, "POST");
+                byte[] encodedPayload = new System.Text.UTF8Encoding().GetBytes(JsonUtility.ToJson(poseRequest));
+                webRequest.uploadHandler = (UploadHandler)new UploadHandlerRaw(encodedPayload);
+                webRequest.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                webRequest.SetRequestHeader("Content-Type", "application/json");
+                webRequest.SetRequestHeader("cache-control", "no-cache");
+                webRequest.certificateHandler = new BypassCertificateValidation();
+
+                yield return webRequest.SendWebRequest();
+                try
+                {
+                    if (webRequest.result != UnityWebRequest.Result.Success)
+                    {
+                        Debug.Log(webRequest.error);
+                    }
+                    else
+                    {
+                        if (webRequest.downloadHandler.text.Equals("Done"))
+                            break;
+                        FullPoseJson receivedJson = JsonUtility.FromJson<FullPoseJson>(webRequest.downloadHandler.text);
+                        bodyJsons.Add(receivedJson.bodyPose);
+                        handJsons.Add(receivedJson.handsPose);
+                        Debug.Log(JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text).frame);
+                        poseRequest.index += 1;
+                        UIManager.Instancce.UpdateProgressBar(receivedJson.frame / totalFrames);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar, false);
+                    UIManager.Instancce.ShowErrorMessage("Error in downloading Full Body Pose Data!");
+                    throw;
+                }
+
+                yield return null;
+            }
+            UIManager.Instancce.UpdateProgressBar(1);
+        }
         yield return null;
         frameReader.SetHandPoseList(handJsons);
         frameReader.SetPoseList(bodyJsons);

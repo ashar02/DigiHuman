@@ -228,7 +228,7 @@ public class UIManager : MonoSingleton<UIManager>
     
     public void OnFullPoseDataReceived()
     {
-        if (!NetworkManager.Instancce.commandLineTextReceived)
+        if (string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
         {
             ShowSuccessMessage("Full pose data downloaded successfully!");
         }
@@ -237,7 +237,7 @@ public class UIManager : MonoSingleton<UIManager>
         handPoseUploadCompleteImage.gameObject.SetActive(true);
         poseUploadCompleteImage.gameObject.SetActive(true);
         frameReader.ArrangeDataFrames();
-        if (NetworkManager.Instancce.commandLineTextReceived)
+        if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
         {
             frameReader.OnTogglePlay();
             if (frameReader.pause)
@@ -245,6 +245,14 @@ public class UIManager : MonoSingleton<UIManager>
             else
                 animationPlayButton.image.sprite = pauseImage;
             canvas.gameObject.SetActive(false);
+        }
+        if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineOutput))
+        {
+            if (SceneCapture.Instance != null)
+            {
+                SceneCapture.Instance.SetOutputFilePath(NetworkManager.Instancce.commandLineOutput);
+                SceneCapture.Instance.StartRecording();
+            }
         }
     }
     

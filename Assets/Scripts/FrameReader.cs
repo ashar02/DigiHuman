@@ -593,7 +593,14 @@ public class FrameReader : MonoBehaviour
             StopRecording();
         if (frameData.Count > 0 && currentAnimationSlot >= frameData.Count)
         {
-            if (NetworkManager.Instancce.commandLineTextReceived)
+            if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineOutput))
+            {
+                if (SceneCapture.Instance != null)
+                {
+                    SceneCapture.Instance.StopRecording();
+                }
+            }
+            if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
             {
                 Application.Quit();
             }

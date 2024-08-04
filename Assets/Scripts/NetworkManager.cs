@@ -71,24 +71,26 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         }
     }
 
-    public bool commandLineTextReceived = false;
+    public string commandLineText = null;
+    public string commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
 
     private void Start()
     {
-        string text = null;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
             if (args[index] == "-text" && (index + 1) < args.Length)
             {
-                text = args[index + 1];
-                break;
+                commandLineText = args[index + 1];
+            }
+            else if (args[index] == "-output" && (index + 1) < args.Length)
+            {
+                commandLineOutput = args[index + 1];
             }
         }
-        if (!string.IsNullOrEmpty(text))
+        if (!string.IsNullOrEmpty(commandLineText))
         {
-            commandLineTextReceived = true;
-            StartCoroutine(UploadText(text, serverFullPoseUploadURL, (response, bytes) =>
+            StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, (response, bytes) =>
             {
                 StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
             }));

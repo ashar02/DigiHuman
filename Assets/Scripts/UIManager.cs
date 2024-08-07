@@ -246,11 +246,12 @@ public class UIManager : MonoSingleton<UIManager>
                 animationPlayButton.image.sprite = pauseImage;
             canvas.gameObject.SetActive(false);
         }
-        if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineOutput))
+        if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineOutput) && !string.IsNullOrEmpty(NetworkManager.Instancce.commandLineFFMPEG))
         {
             if (SceneCapture.Instance != null)
             {
                 SceneCapture.Instance.SetOutputFilePath(NetworkManager.Instancce.commandLineOutput);
+                SceneCapture.Instance.SetFFMPEGFilePath(NetworkManager.Instancce.commandLineFFMPEG);
                 SceneCapture.Instance.StartRecording();
             }
         }

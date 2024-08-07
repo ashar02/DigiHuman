@@ -8,14 +8,13 @@ using UnityEngine;
 public class SceneCapture : MonoBehaviour
 {
     public static SceneCapture Instance { get; private set; }
-    private string ffmpegPath = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
-    private int frameRate = 25;
+    private string ffmpegPath;
+    private int frameRate = 40;
 
     private int width;
     private int height;
     private string outputFilePath;
     private Texture2D screenTexture;
-    private RenderTexture renderTexture;
     private Coroutine recordingCoroutine;
     private bool isRecording;
 
@@ -34,15 +33,14 @@ public class SceneCapture : MonoBehaviour
 
     void Start()
     {
+        ffmpegPath = Path.Combine(Application.dataPath, "../ffmpeg");
         width = Screen.width;
         height = Screen.height;
         if (height % 2 != 0)
         {
-            height += 1;
+            height -= 1;
         }
-        // Initialize textures with the current screen dimensions
         screenTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
-        renderTexture = new RenderTexture(width, height, 24);
     }
 
     void OnDestroy()
@@ -56,6 +54,11 @@ public class SceneCapture : MonoBehaviour
     public void SetOutputFilePath(string path)
     {
         outputFilePath = path;
+    }
+
+    public void SetFFMPEGFilePath(string path)
+    {
+        ffmpegPath = path;
     }
 
     public void StartRecording()
@@ -86,12 +89,10 @@ public class SceneCapture : MonoBehaviour
 
         Process ffmpegProcess = new Process();
         ffmpegProcess.StartInfo.FileName = ffmpegPath;
-        ffmpegProcess.StartInfo.Arguments = $"-y -f rawvideo -pixel_format rgb24 -video_size {width}x{height} -framerate {frameRate} -i - -c:v libx264 -pix_fmt yuv420p -preset ultrafast \"{outputFilePath}\"";
+        ffmpegProcess.StartInfo.Arguments = $"-y -f rawvideo -pixel_format rgb24 -video_size {width}x{height} -framerate {frameRate} -i - -vf \"vflip\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast \"{outputFilePath}\"";
         ffmpegProcess.StartInfo.UseShellExecute = false;
         ffmpegProcess.StartInfo.RedirectStandardInput = true;
         ffmpegProcess.StartInfo.CreateNoWindow = true;
-        //ffmpegProcess.StartInfo.RedirectStandardOutput = true;
-        //ffmpegProcess.StartInfo.RedirectStandardError = true;
         try
         {
             ffmpegProcess.Start();
@@ -102,42 +103,29 @@ public class SceneCapture : MonoBehaviour
             yield break;
         }
 
-        IntPtr buffer = Marshal.AllocHGlobal(width * height * 3);
-
         while (isRecording)
         {
             yield return new WaitForEndOfFrame();
             try
             {
-                CaptureFrame(buffer);
+                CaptureFrame();
                 byte[] rawData = screenTexture.GetRawTextureData();
                 ffmpegProcess.StandardInput.BaseStream.Write(rawData, 0, rawData.Length);
                 ffmpegProcess.StandardInput.BaseStream.Flush();
             }
             catch (Exception e)
             {
-                //string output = ffmpegProcess.StandardOutput.ReadToEnd();
-                //string error = ffmpegProcess.StandardError.ReadToEnd();
-                //UnityEngine.Debug.Log($"FFmpeg output: {output}");
-                //UnityEngine.Debug.Log($"FFmpeg error: {error}");
                 UnityEngine.Debug.LogError($"Error during recording: {e.Message}");
             }
         }
 
         ffmpegProcess.StandardInput.Close();
         ffmpegProcess.WaitForExit();
-        Marshal.FreeHGlobal(buffer);
     }
 
-    private void CaptureFrame(IntPtr buffer)
+    private void CaptureFrame()
     {
-        RenderTexture.active = renderTexture;
-        GL.Clear(true, true, Color.clear);
-        Graphics.Blit(null, renderTexture);
-
         screenTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
         screenTexture.Apply();
-
-        Marshal.Copy(screenTexture.GetRawTextureData(), 0, buffer, width * height * 3);
     }
 }

@@ -71,11 +71,15 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         }
     }
 
-    public string commandLineText = null;
-    public string commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
+    public string commandLineText = "";
+    public string commandLineOutput = "";
+    public string commandLineFFMPEG = "";
 
     private void Start()
     {
+        commandLineText = "hello how";
+        commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
+        commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -86,6 +90,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             else if (args[index] == "-output" && (index + 1) < args.Length)
             {
                 commandLineOutput = args[index + 1];
+            }
+            else if (args[index] == "-ffmpeg" && (index + 1) < args.Length)
+            {
+                commandLineFFMPEG = args[index + 1];
             }
         }
         if (!string.IsNullOrEmpty(commandLineText))

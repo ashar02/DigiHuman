@@ -71,9 +71,9 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         }
     }
 
-    public string commandLineText = "";
-    public string commandLineOutput = "";
-    public string commandLineFFMPEG = "";
+    [SerializeField] public string commandLineText = "";
+    [SerializeField] public string commandLineOutput = "";
+    [SerializeField] public string commandLineFFMPEG = "";
 
     private void Start()
     {

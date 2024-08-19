@@ -9,7 +9,7 @@ public class SceneCapture : MonoBehaviour
 {
     public static SceneCapture Instance { get; private set; }
     private string ffmpegPath;
-    private int frameRate = 40;
+    private int frameRate = 24;
 
     private int width;
     private int height;
@@ -17,6 +17,8 @@ public class SceneCapture : MonoBehaviour
     private Texture2D screenTexture;
     private Coroutine recordingCoroutine;
     private bool isRecording;
+    private float timeBetweenFrames;
+    private float timeSinceLastFrame;
 
     void Awake()
     {
@@ -41,6 +43,7 @@ public class SceneCapture : MonoBehaviour
             height -= 1;
         }
         screenTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
+        timeBetweenFrames = 1f / frameRate;
     }
 
     void OnDestroy()
@@ -105,18 +108,26 @@ public class SceneCapture : MonoBehaviour
 
         while (isRecording)
         {
-            yield return new WaitForEndOfFrame();
-            try
+            timeSinceLastFrame += Time.deltaTime;
+
+            if (timeSinceLastFrame >= timeBetweenFrames)
             {
-                CaptureFrame();
-                byte[] rawData = screenTexture.GetRawTextureData();
-                ffmpegProcess.StandardInput.BaseStream.Write(rawData, 0, rawData.Length);
-                ffmpegProcess.StandardInput.BaseStream.Flush();
+                timeSinceLastFrame -= timeBetweenFrames;
+
+                try
+                {
+                    CaptureFrame();
+                    byte[] rawData = screenTexture.GetRawTextureData();
+                    ffmpegProcess.StandardInput.BaseStream.Write(rawData, 0, rawData.Length);
+                    ffmpegProcess.StandardInput.BaseStream.Flush();
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogError($"Error during recording: {e.Message}");
+                }
             }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogError($"Error during recording: {e.Message}");
-            }
+
+            yield return null;
         }
 
         ffmpegProcess.StandardInput.Close();

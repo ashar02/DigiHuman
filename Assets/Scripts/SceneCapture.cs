@@ -9,7 +9,8 @@ public class SceneCapture : MonoBehaviour
 {
     public static SceneCapture Instance { get; private set; }
     private string ffmpegPath;
-    private int frameRate = 24;
+    private int frameRate = 30;
+    private int framesToSkip = 3;
 
     private int width;
     private int height;
@@ -68,6 +69,7 @@ public class SceneCapture : MonoBehaviour
     {
         if (recordingCoroutine == null)
         {
+            framesToSkip = 3;
             isRecording = true;
             recordingCoroutine = StartCoroutine(Record());
         }
@@ -114,16 +116,23 @@ public class SceneCapture : MonoBehaviour
             {
                 timeSinceLastFrame -= timeBetweenFrames;
 
-                try
+                if (framesToSkip > 0)
                 {
-                    CaptureFrame();
-                    byte[] rawData = screenTexture.GetRawTextureData();
-                    ffmpegProcess.StandardInput.BaseStream.Write(rawData, 0, rawData.Length);
-                    ffmpegProcess.StandardInput.BaseStream.Flush();
+                    framesToSkip--;
                 }
-                catch (Exception e)
+                else
                 {
-                    UnityEngine.Debug.LogError($"Error during recording: {e.Message}");
+                    try
+                    {
+                        CaptureFrame();
+                        byte[] rawData = screenTexture.GetRawTextureData();
+                        ffmpegProcess.StandardInput.BaseStream.Write(rawData, 0, rawData.Length);
+                        ffmpegProcess.StandardInput.BaseStream.Flush();
+                    }
+                    catch (Exception e)
+                    {
+                        UnityEngine.Debug.LogError($"Error during recording: {e.Message}");
+                    }
                 }
             }
 

@@ -9,7 +9,7 @@ public class SceneCapture : MonoBehaviour
 {
     public static SceneCapture Instance { get; private set; }
     private string ffmpegPath;
-    private int frameRate = 30;
+    private int frameRate = 60;
     private int framesToSkip = 3;
 
     private int width;
@@ -94,7 +94,7 @@ public class SceneCapture : MonoBehaviour
 
         Process ffmpegProcess = new Process();
         ffmpegProcess.StartInfo.FileName = ffmpegPath;
-        ffmpegProcess.StartInfo.Arguments = $"-y -f rawvideo -pixel_format rgb24 -video_size {width}x{height} -framerate {frameRate} -i - -vf \"vflip\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast \"{outputFilePath}\"";
+        ffmpegProcess.StartInfo.Arguments = $"-y -f rawvideo -pixel_format rgb24 -video_size {width}x{height} -framerate 30 -i - -vf \"vflip\" -c:v libx264 -pix_fmt yuv420p -preset ultrafast \"{outputFilePath}\"";
         ffmpegProcess.StartInfo.UseShellExecute = false;
         ffmpegProcess.StartInfo.RedirectStandardInput = true;
         ffmpegProcess.StartInfo.CreateNoWindow = true;
@@ -136,7 +136,7 @@ public class SceneCapture : MonoBehaviour
                 }
             }
 
-            yield return null;
+            yield return new WaitForSeconds(timeBetweenFrames);
         }
 
         ffmpegProcess.StandardInput.Close();

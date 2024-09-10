@@ -46,8 +46,15 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public int totalFrames;
         public float aspectRatio;
     }
-    
-    
+
+    [Serializable]
+    public struct WebDataObject
+    {
+        public string text;
+        public int character;
+        public string baseUrl;
+    }
+
     [Serializable] 
     public struct PoseRequest
     {
@@ -114,7 +121,24 @@ public class NetworkManager : MonoSingleton<NetworkManager>
 #endif
     }
 
+    public void RecievePoseText(string data)
+    {
+        Debug.Log("Pose text recieved from angular ____________: ");
+        Debug.Log(data);
+        WebDataObject webData = JsonUtility.FromJson<WebDataObject>(data);
+        // Application.ExternalCall("onDataRecieved", "hello from unitu i recieved your message");
+    //#if UNITY_WEBGL && !UNITY_EDITOR
+        //    Application.ExternalCall("onDataRecieved", "Hello from Unity, I received your message");
+   // #endif
 
+        if (!string.IsNullOrEmpty(webData.text))
+        {
+            StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, (response, bytes) =>
+            {
+                StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
+            }));
+        }
+    }
     //starting coroutine for sending ASync to server
     public void UploadAndEstimateFullPoseUsingText(string text, Action onSuccess = null)
     {

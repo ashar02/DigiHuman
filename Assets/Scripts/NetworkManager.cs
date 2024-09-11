@@ -81,12 +81,16 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineText = "";
     [SerializeField] public string commandLineOutput = "";
     [SerializeField] public string commandLineFFMPEG = "";
+    [SerializeField] public string commandLineBaseUrl = "";
+    [SerializeField] public int commandLineCharacter = -1;
 
     private void Start()
     {
         commandLineText = "hello how";
-        commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
-        commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
+        //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
+        //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
+        //commandLineBaseUrl = "https://localhost:3002/";
+        //commandLineCharacter = 0;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -102,23 +106,47 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 commandLineFFMPEG = args[index + 1];
             }
-        }
-        if (!string.IsNullOrEmpty(commandLineText))
-        {
-            StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, (response, bytes) =>
+            else if (args[index] == "-url" && (index + 1) < args.Length)
             {
-                StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
-            }));
-        }
-#if UNITY_EDITOR
-        if (enableDebug)
-        {
-            StartCoroutine(Upload(filePath, serverFullPoseUploadURL, (response, bytes) =>
+                commandLineBaseUrl = args[index + 1];
+            }
+            else if (args[index] == "-character" && (index + 1) < args.Length)
             {
-                StartCoroutine(GetFullBodyPoseEstimates(response,bytes));
-            }));
+                string commandLineArg = args[index + 1];
+                if (int.TryParse(commandLineArg, out int character))
+                {
+                    commandLineCharacter = character;
+                }
+            }
         }
-#endif
+#if !UNITY_WEBGL
+            if (!string.IsNullOrEmpty(commandLineBaseUrl))
+            {
+                Uri baseUri = new Uri(serverFullPoseUploadURL);
+                string pathAndQuery = baseUri.PathAndQuery;
+                if (commandLineBaseUrl.EndsWith("/"))
+                {
+                    commandLineBaseUrl = commandLineBaseUrl.TrimEnd('/');
+                }
+                serverFullPoseUploadURL = commandLineBaseUrl + pathAndQuery;
+            }
+            if (!string.IsNullOrEmpty(commandLineText))
+            {
+                StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, (response, bytes) =>
+                {
+                    StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
+                }));
+            }
+        #endif
+        #if UNITY_EDITOR
+            if (enableDebug)
+            {
+                StartCoroutine(Upload(filePath, serverFullPoseUploadURL, (response, bytes) =>
+                {
+                    StartCoroutine(GetFullBodyPoseEstimates(response,bytes));
+                }));
+            }
+        #endif
     }
 
     public void RecievePoseText(string data)
@@ -126,19 +154,25 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         Debug.Log("Pose text recieved from angular ____________: ");
         Debug.Log(data);
         WebDataObject webData = JsonUtility.FromJson<WebDataObject>(data);
-        // Application.ExternalCall("onDataRecieved", "hello from unitu i recieved your message");
-    //#if UNITY_WEBGL && !UNITY_EDITOR
-        //    Application.ExternalCall("onDataRecieved", "Hello from Unity, I received your message");
-   // #endif
-
         if (!string.IsNullOrEmpty(webData.text))
         {
+            if (!string.IsNullOrEmpty(webData.baseUrl))
+            {
+                Uri baseUri = new Uri(serverFullPoseUploadURL);
+                string pathAndQuery = baseUri.PathAndQuery;
+                if (webData.baseUrl.EndsWith("/"))
+                {
+                    webData.baseUrl = webData.baseUrl.TrimEnd('/');
+                }
+                serverFullPoseUploadURL = webData.baseUrl + pathAndQuery;
+            }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, (response, bytes) =>
             {
                 StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
             }));
         }
     }
+
     //starting coroutine for sending ASync to server
     public void UploadAndEstimateFullPoseUsingText(string text, Action onSuccess = null)
     {
@@ -208,17 +242,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     //Async file uploader method2
     IEnumerator UploadText(string text, string url, Action<UploadResponse, byte[]> onFinishedUpload)
     {
-        // WWW localFile = new WWW("file:///" + localFileName);
-        // yield return localFile;
-        // if (localFile.error == null)
-        //     Debug.Log("Loaded file successfully");
-        // else
-        // {
-        //     Debug.Log("Open file error: "+localFile.error);
-        //     yield break; // stop the coroutine here
-        // }
         WWWForm postForm = new WWWForm();
-        //postForm.AddBinaryData("file",localFile.bytes,localFileName,"text/plain");
         postForm.AddField("text", text);
         UnityWebRequest www = UnityWebRequest.Post(url, postForm);
         www.certificateHandler = new BypassCertificateValidation();

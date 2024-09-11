@@ -588,6 +588,15 @@ public class FrameReader : MonoBehaviour
 
     private void OnAnimationPlayFinish()
     {
+        //#if UNITY_WEBGL || UNITY_EDITOR
+        #if UNITY_WEBGL && !UNITY_EDITOR
+            videoPlayer.frame = 0;
+            videoPlayer.Play();
+            slider.value = 0;
+            if (recording)
+                StopRecording();
+            return;
+        #endif
         videoPlayer.Pause();
         if(recording)
             StopRecording();

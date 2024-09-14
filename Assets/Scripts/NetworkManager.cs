@@ -281,8 +281,15 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             Debug.Log(www.downloadHandler.text);
             try
             {
-                UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(www.downloadHandler.text);
-                onFinishedUpload(uploadResponse, results);
+                if (type == -2)
+                {
+                    onFinishedUpload((new UploadResponse()), results);
+                }
+                else
+                {
+                    UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(www.downloadHandler.text);
+                    onFinishedUpload(uploadResponse, results);
+                }
             }
             catch (Exception e)
             {

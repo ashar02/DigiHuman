@@ -26,6 +26,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
 
     [Header("Dependencies")] 
     [SerializeField] private FrameReader frameReader;
+    [SerializeField] private CharacterChooser characterChooser;
 
 
     
@@ -90,7 +91,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
         //commandLineBaseUrl = "https://localhost:3002/";
-        //commandLineCharacter = 0;
+        commandLineCharacter = 0;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -119,8 +120,9 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
             }
         }
+        characterChooser.commandLineCharacter = commandLineCharacter;
 #if !UNITY_WEBGL
-            if (!string.IsNullOrEmpty(commandLineBaseUrl))
+        if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
                 string pathAndQuery = baseUri.PathAndQuery;

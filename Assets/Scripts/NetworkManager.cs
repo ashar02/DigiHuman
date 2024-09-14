@@ -83,6 +83,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineFFMPEG = "";
     [SerializeField] public string commandLineBaseUrl = "";
     [SerializeField] public int commandLineCharacter = -1;
+    [SerializeField] public int apiType = -1; //-1: orignal api call; -2: our own api call
 
     private void Start()
     {
@@ -119,7 +120,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
             }
         }
-#if !UNITY_WEBGL
+        #if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
@@ -132,9 +133,9 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             if (!string.IsNullOrEmpty(commandLineText))
             {
-                StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, (response, bytes) =>
+                StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, apiType, (response, bytes) =>
                 {
-                    StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
+                    StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
                 }));
             }
         #endif
@@ -166,9 +167,9 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
                 serverFullPoseUploadURL = webData.baseUrl + pathAndQuery;
             }
-            StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, (response, bytes) =>
+            StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
             {
-                StartCoroutine(GetFullBodyPoseEstimates(response, bytes, -1));
+                StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
             }));
         }
     }
@@ -176,7 +177,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     //starting coroutine for sending ASync to server
     public void UploadAndEstimateFullPoseUsingText(string text, Action onSuccess = null)
     {
-        StartCoroutine(UploadText(text, serverFullPoseUploadURL, (response, bytes) =>
+        StartCoroutine(UploadText(text, serverFullPoseUploadURL, apiType, (response, bytes) =>
         {
             StartCoroutine(GetFullBodyPoseEstimates(response, bytes));
             onSuccess?.Invoke();
@@ -240,11 +241,24 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     
     
     //Async file uploader method2
-    IEnumerator UploadText(string text, string url, Action<UploadResponse, byte[]> onFinishedUpload)
+    IEnumerator UploadText(string text, string url, int type, Action<UploadResponse, byte[]> onFinishedUpload)
     {
-        WWWForm postForm = new WWWForm();
-        postForm.AddField("text", text);
-        UnityWebRequest www = UnityWebRequest.Post(url, postForm);
+        UnityWebRequest www;
+        if (type == -2)
+        {
+            Uri baseUri = new Uri(url);
+            string baseUrl = baseUri.Port > 0 ? $"{baseUri.Scheme}://{baseUri.Host}:{baseUri.Port}" : $"{baseUri.Scheme}://{baseUri.Host}";
+            string newApiEndpoint = "/spoken_text_to_signed_pose";
+            string fullUrl = baseUrl + newApiEndpoint;
+            string queryParams = $"?text={UnityWebRequest.EscapeURL(text)}&spoken=en&signed=ase&mode=4&spell=true";
+            fullUrl += queryParams;
+            www = UnityWebRequest.Get(fullUrl);
+        } else
+        {
+            WWWForm postForm = new WWWForm();
+            postForm.AddField("text", text);
+            www = UnityWebRequest.Post(url, postForm);
+        }
         www.certificateHandler = new BypassCertificateValidation();
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.Loading, true);
         yield return www.SendWebRequest();
@@ -272,15 +286,14 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             catch (Exception e)
             {
-
                 onFinishedUpload((new UploadResponse()), results);
                 Console.WriteLine(e);
                 throw;
             }
-            //sending response to the action method
             Debug.Log("Upload complete!");
         }
     }
+
 
     //Async file uploader
     IEnumerator UploadFileCo(string localFileName, string uploadURL)
@@ -567,18 +580,49 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     {
         PoseRequest poseRequest = new PoseRequest();
         poseRequest.index = start;
-        poseRequest.fileName = response.file;
-        frameReader.SetVideoFractions(response.aspectRatio);
+        //poseRequest.fileName = response.file;
+        //frameReader.SetVideoFractions(response.aspectRatio);
 
-        float totalFrames = response.totalFrames;    
+        float totalFrames = 0;
         
         List<HandJson> handJsons = new List<HandJson>();
         List<PoseJson> bodyJsons = new List<PoseJson>();
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar,true);
         UIManager.Instancce.UpdateProgressBar(0);
 
-        if (start == -1)
+        if (start == -2)
         {
+            poseRequest.fileName = "test";
+            frameReader.SetVideoFractions(1.0f);
+            try
+            {
+                string jsonResponse = System.Text.Encoding.UTF8.GetString(bytes);
+                //Debug.Log("JSON Response: " + jsonResponse);
+
+                // Manually parse the JSON array
+                FullPoseJson[] receivedJsonArray = JsonHelper.FromJsonArray<FullPoseJson>(jsonResponse);
+                totalFrames = receivedJsonArray.Length;
+                foreach (var poseJson in receivedJsonArray)
+                {
+                    bodyJsons.Add(poseJson.bodyPose);
+                    handJsons.Add(poseJson.handsPose);
+                }
+                UIManager.Instancce.UpdateProgressBar(1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar, false);
+                UIManager.Instancce.ShowErrorMessage("Error in downloading Full Body Pose Data!");
+                throw;
+            }
+        }
+        else if (start == -1)
+        {
+            poseRequest.fileName = response.file;
+            frameReader.SetVideoFractions(response.aspectRatio);
+            totalFrames = response.totalFrames;
+
             // Fetch all frames at once
             UnityWebRequest webRequest = new UnityWebRequest(serverFullPoseEstimatorURL, "POST");
             byte[] encodedPayload = new System.Text.UTF8Encoding().GetBytes(JsonUtility.ToJson(poseRequest));
@@ -620,6 +664,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         }
         else
         {
+            poseRequest.fileName = response.file;
+            frameReader.SetVideoFractions(response.aspectRatio);
+            totalFrames = response.totalFrames;
+
             // Fetch frame by frame
             while (true)
             {

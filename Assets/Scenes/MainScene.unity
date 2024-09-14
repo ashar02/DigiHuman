@@ -13757,14 +13757,8 @@ MonoBehaviour:
   serverFaceUploadURL: https://127.0.0.1:3002/faceUploader
   serverFaceMocapURL: https://127.0.0.1:3002/face
   frameReader: {fileID: 620901066}
-  characterChooser: {fileID: 1429861315}
   enableDebug: 0
   filePath: C:/Danial/Projects/Danial/DigiHuman/Assets/video/Action_with_wiper_Trim.mp4
-  commandLineText: 
-  commandLineOutput: 
-  commandLineFFMPEG: 
-  commandLineBaseUrl: 
-  commandLineCharacter: -1
 --- !u!4 &203192803
 Transform:
   m_ObjectHideFlags: 0
@@ -40865,7 +40859,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1031314121711542605, guid: bce30a6cc7e9c834db1091b45a8adf7b, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1031314121851738909, guid: bce30a6cc7e9c834db1091b45a8adf7b, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -47203,7 +47197,7 @@ VideoPlayer:
   - {fileID: 0}
   m_DirectAudioVolumes:
   - 1
-  m_Url: 
+  m_Url:
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
   m_ControlledAudioTrackCount: 1
@@ -99108,7 +99102,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   frameReader: {fileID: 620901066}
   slideShow: {fileID: 769288014}
-  commandLineCharacter: 1
 --- !u!1 &1430316693
 GameObject:
   m_ObjectHideFlags: 0
@@ -140160,7 +140153,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2049698385}
-  - component: {fileID: 2049698386}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged

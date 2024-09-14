@@ -150,6 +150,11 @@ public class SlideShow : MonoBehaviour
             nodes.Add(newNodes[i]);
         }
     }
+
+    public void SetCharacterIndex(int index) { 
+        this.index = index;
+        OnSelectItem();
+    }
 }
 
 #if UNITY_EDITOR

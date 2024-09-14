@@ -83,7 +83,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineFFMPEG = "";
     [SerializeField] public string commandLineBaseUrl = "";
     [SerializeField] public int commandLineCharacter = -1;
-    [SerializeField] public int apiType = -1; //-1: orignal api call; -2: our own api call
+    [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
 
     private void Start()
     {
@@ -250,7 +250,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             string baseUrl = baseUri.Port > 0 ? $"{baseUri.Scheme}://{baseUri.Host}:{baseUri.Port}" : $"{baseUri.Scheme}://{baseUri.Host}";
             string newApiEndpoint = "/spoken_text_to_signed_pose";
             string fullUrl = baseUrl + newApiEndpoint;
-            string queryParams = $"?text={UnityWebRequest.EscapeURL(text)}&spoken=en&signed=ase&mode=4&spell=true";
+            string queryParams = $"?text={UnityWebRequest.EscapeURL(text)}&spoken=en&signed=ase&myown=4&spell=true";
             fullUrl += queryParams;
             www = UnityWebRequest.Get(fullUrl);
         } else

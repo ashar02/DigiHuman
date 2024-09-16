@@ -13760,8 +13760,15 @@ MonoBehaviour:
   nodes:
   - {fileID: 1231570487}
   - {fileID: 841088528}
+  - {fileID: 919132149155446097, guid: ae02320e04a792746b57d2c5cadab473, type: 3}
   enableDebug: 0
   filePath: C:/Danial/Projects/Danial/DigiHuman/Assets/video/Action_with_wiper_Trim.mp4
+  commandLineText: 
+  commandLineOutput: 
+  commandLineFFMPEG: 
+  commandLineBaseUrl: 
+  commandLineCharacter: 2
+  apiType: -2
 --- !u!4 &203192803
 Transform:
   m_ObjectHideFlags: 0
@@ -47200,7 +47207,7 @@ VideoPlayer:
   - {fileID: 0}
   m_DirectAudioVolumes:
   - 1
-  m_Url:
+  m_Url: 
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
   m_ControlledAudioTrackCount: 1
@@ -140156,6 +140163,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2049698385}
+  - component: {fileID: 2049698386}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged

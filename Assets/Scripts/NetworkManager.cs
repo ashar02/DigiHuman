@@ -83,7 +83,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineOutput = "";
     [SerializeField] public string commandLineFFMPEG = "";
     [SerializeField] public string commandLineBaseUrl = "";
-    [SerializeField] public int commandLineCharacter = -1;
+    [SerializeField] public int commandLineCharacter = 0;
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
 
     private void Start()
@@ -91,8 +91,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         commandLineText = "hello how";
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
-        //commandLineBaseUrl = "https://localhost:3002/";
-        commandLineCharacter = 0;
+        //commandLineBaseUrl = "https://translate.deaftawk.com:3001/";
+        //commandLineCharacter = 2;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -161,6 +161,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         {
             if (!string.IsNullOrEmpty(webData.baseUrl))
             {
+                characterChooser.commandLineCharacter = webData.character;
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
                 string pathAndQuery = baseUri.PathAndQuery;
                 if (webData.baseUrl.EndsWith("/"))

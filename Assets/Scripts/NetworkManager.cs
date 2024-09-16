@@ -26,7 +26,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
 
     [Header("Dependencies")] 
     [SerializeField] private FrameReader frameReader;
-    [SerializeField] private CharacterChooser characterChooser;
+    public List<GameObject> nodes;
+
 
 
     
@@ -92,7 +93,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
         //commandLineBaseUrl = "https://translate.deaftawk.com:3001/";
-        //commandLineCharacter = 2;
+        //commandLineCharacter = 1;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -121,7 +122,6 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
             }
         }
-        characterChooser.commandLineCharacter = commandLineCharacter;
         #if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
@@ -137,6 +137,11 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, apiType, (response, bytes) =>
                 {
+                    if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
+                    {
+                        this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]));
+                        this.frameReader.ShowCharacter();
+                    }
                     StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
                 }));
             }
@@ -161,7 +166,6 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         {
             if (!string.IsNullOrEmpty(webData.baseUrl))
             {
-                characterChooser.commandLineCharacter = webData.character;
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
                 string pathAndQuery = baseUri.PathAndQuery;
                 if (webData.baseUrl.EndsWith("/"))
@@ -172,6 +176,11 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
             {
+                if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
+                {
+                    this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]));
+                    this.frameReader.ShowCharacter();
+                }
                 StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
             }));
         }

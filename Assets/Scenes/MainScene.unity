@@ -13767,7 +13767,7 @@ MonoBehaviour:
   commandLineOutput: 
   commandLineFFMPEG: 
   commandLineBaseUrl: 
-  commandLineCharacter: 2
+  commandLineCharacter: 0
   apiType: -2
 --- !u!4 &203192803
 Transform:

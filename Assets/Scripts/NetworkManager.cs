@@ -89,6 +89,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
 
     private void Start()
     {
+        #if !UNITY_EDITOR && UNITY_WEBGL
+            // disable WebGLInput.captureAllKeyboardInput so elements in web page can handle keyboard inputs
+            WebGLInput.captureAllKeyboardInput = false;
+        #endif
         commandLineText = "hello how";
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";

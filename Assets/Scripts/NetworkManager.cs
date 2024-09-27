@@ -93,7 +93,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             // disable WebGLInput.captureAllKeyboardInput so elements in web page can handle keyboard inputs
             WebGLInput.captureAllKeyboardInput = false;
         #endif
-        commandLineText = "hello how";
+        //commandLineText = "hello how";
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
         //commandLineBaseUrl = "https://translate.deaftawk.com:3001/";
@@ -159,6 +159,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }));
             }
         #endif
+        //StartCoroutine(CallRecievePoseTextRepeatedly(25f));
+    }
+
+    private IEnumerator CallRecievePoseTextRepeatedly(float intervalSeconds)
+    {
+        while (true)
+        {
+            commandLineText = "{\"text\": \"hello\", \"character\": 1, \"baseUrl\": \"https://translate.deaftawk.com:3001\"}";
+            RecievePoseText(commandLineText);
+            yield return new WaitForSeconds(intervalSeconds);
+        }
     }
 
     public void RecievePoseText(string data)

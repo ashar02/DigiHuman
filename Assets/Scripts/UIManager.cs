@@ -237,11 +237,11 @@ public class UIManager : MonoSingleton<UIManager>
         handPoseUploadCompleteImage.gameObject.SetActive(true);
         poseUploadCompleteImage.gameObject.SetActive(true);
         frameReader.ArrangeDataFrames();
+        #if UNITY_WEBGL && !UNITY_EDITOR
+            Application.ExternalCall("onDataRecieved", "Hello from Unity, I received your message");
+        #endif
         if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
         {
-            #if UNITY_WEBGL && !UNITY_EDITOR
-                Application.ExternalCall("onDataRecieved", "Hello from Unity, I received your message");
-            #endif
             frameReader.OnTogglePlay();
             if (frameReader.pause)
                 animationPlayButton.image.sprite = resumeImage;

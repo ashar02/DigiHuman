@@ -265,8 +265,8 @@ public class FrameReader : MonoBehaviour
                 catch (Exception e)
                 {
                     print("File problem or empty array!" + "\n" + e.StackTrace);
-                    throw;
                     Console.Write(e);
+                    throw;
                 }
             }
 
@@ -367,8 +367,8 @@ public class FrameReader : MonoBehaviour
                 slider.value = currentAnimationSlot;
                 character.transform.rotation = characterRotation;
                 Console.WriteLine(e);
-                throw;
                 Debug.LogError("Problem occured: " + e.Message);
+                throw;
             }
 
             try
@@ -414,8 +414,8 @@ public class FrameReader : MonoBehaviour
             catch (Exception e)
             {
                 print("File problem or empty array!" + "\n" + e.StackTrace);
-                throw;
                 Console.Write(e);
+                throw;
             }
             
             

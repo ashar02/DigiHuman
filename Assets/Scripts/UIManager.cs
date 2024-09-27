@@ -228,10 +228,12 @@ public class UIManager : MonoSingleton<UIManager>
     
     public void OnFullPoseDataReceived()
     {
-        if (string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
-        {
-            ShowSuccessMessage("Full pose data downloaded successfully!");
-        }
+        #if !UNITY_WEBGL
+            if (string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
+            {
+                ShowSuccessMessage("Full pose data downloaded successfully!");
+            }
+        #endif
         handPoseUploadCircleImage.color = successDownloadColor;
         poseUploadCircleImage.color = successDownloadColor;
         handPoseUploadCompleteImage.gameObject.SetActive(true);

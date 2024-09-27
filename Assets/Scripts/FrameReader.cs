@@ -925,7 +925,7 @@ public class FrameReader : MonoBehaviour
         videoPlayer.frame = 0;
         
         pause = !pause;
-        #if UNITY_WEBGL && UNITY_EDITOR
+        #if UNITY_WEBGL && !UNITY_EDITOR
             pause = false;
         #endif
         // videoPlayer.Play();

@@ -239,6 +239,12 @@ public class UIManager : MonoSingleton<UIManager>
         frameReader.ArrangeDataFrames();
         #if UNITY_WEBGL && !UNITY_EDITOR
             Application.ExternalCall("onDataRecieved", "Hello from Unity, I received your message");
+            frameReader.OnTogglePlay();
+            if (frameReader.pause)
+                animationPlayButton.image.sprite = resumeImage;
+            else
+                animationPlayButton.image.sprite = pauseImage;
+            canvas.gameObject.SetActive(false);
         #endif
         if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
         {

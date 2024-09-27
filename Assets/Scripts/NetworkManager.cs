@@ -159,15 +159,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }));
             }
         #endif
-        //StartCoroutine(CallRecievePoseTextRepeatedly(25f));
+        //StartCoroutine(CallRecievePoseTextRepeatedly(10f));
     }
 
     private IEnumerator CallRecievePoseTextRepeatedly(float intervalSeconds)
     {
+        int index = 0;
         while (true)
         {
-            commandLineText = "{\"text\": \"hello\", \"character\": 1, \"baseUrl\": \"https://translate.deaftawk.com:3001\"}";
-            RecievePoseText(commandLineText);
+            string text = "{\"text\": \"" + "hello " + index + "\", \"character\": 0, \"baseUrl\": \"https://translate.deaftawk.com:3001\"}";
+            RecievePoseText(text);
+            index++;
             yield return new WaitForSeconds(intervalSeconds);
         }
     }
@@ -191,6 +193,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
             {
+                commandLineCharacter = webData.character;
                 if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
                 {
                     this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]));

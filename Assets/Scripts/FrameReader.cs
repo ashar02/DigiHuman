@@ -588,7 +588,6 @@ public class FrameReader : MonoBehaviour
 
     private void OnAnimationPlayFinish()
     {
-        //#if UNITY_WEBGL || UNITY_EDITOR
         #if UNITY_WEBGL && !UNITY_EDITOR
             videoPlayer.frame = 0;
             videoPlayer.Play();
@@ -926,6 +925,9 @@ public class FrameReader : MonoBehaviour
         videoPlayer.frame = 0;
         
         pause = !pause;
+        #if UNITY_WEBGL && UNITY_EDITOR
+            pause = false;
+        #endif
         // videoPlayer.Play();
         if(enableVideo && videoPlayer.url != "")
             test();

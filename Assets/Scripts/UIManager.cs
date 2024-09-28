@@ -228,7 +228,7 @@ public class UIManager : MonoSingleton<UIManager>
     
     public void OnFullPoseDataReceived()
     {
-        #if !UNITY_WEBGL
+        #if !UNITY_WEBGL && UNITY_EDITOR
             if (string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
             {
                 ShowSuccessMessage("Full pose data downloaded successfully!");

@@ -297,7 +297,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);
-            UIManager.Instancce.ShowErrorMessage("Server Connection Failed!");
+            #if !UNITY_EDITOR
+                #if UNITY_WEBGL
+                    Application.ExternalCall("onDataRecieved", "Server Connection Failed!");
+                #endif
+                if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
+                {
+                    Application.Quit();
+                }
+            #else
+                UIManager.Instancce.ShowErrorMessage("Server Connection Failed!");
+            #endif
         }
         else
         {
@@ -650,7 +660,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 Console.WriteLine(e);
                 UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar, false);
-                UIManager.Instancce.ShowErrorMessage("Error in downloading Full Body Pose Data!");
+                #if !UNITY_EDITOR
+                    #if UNITY_WEBGL
+                        Application.ExternalCall("onDataRecieved", "Failed in downloading Full Body Pose Data!");
+                    #endif
+                    if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
+                    {
+                        Application.Quit();
+                    }
+                #else
+                    UIManager.Instancce.ShowErrorMessage("Failed in downloading Full Body Pose Data!");
+                #endif
                 throw;
             }
         }

@@ -92,6 +92,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         #if !UNITY_EDITOR && UNITY_WEBGL
             // disable WebGLInput.captureAllKeyboardInput so elements in web page can handle keyboard inputs
             WebGLInput.captureAllKeyboardInput = false;
+            Debug.Log("captureAllKeyboardInput ____________: ");
         #endif
         //commandLineText = "hello how";
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
@@ -318,7 +319,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 Debug.Log(results.Length);
             }
 
-            Debug.Log(www.downloadHandler.text);
+            //Debug.Log(www.downloadHandler.text);
             try
             {
                 if (type == -2)
@@ -410,7 +411,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 Debug.Log(results.Length);
             }
             
-            Debug.Log(www.downloadHandler.text);
+            //Debug.Log(www.downloadHandler.text);
             try
             {
                 UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(www.downloadHandler.text);
@@ -533,7 +534,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                         break;
                     HandJson receivedJson = JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text);
                     poseJsons.Add(receivedJson);
-                    Debug.Log(JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text).frame);
+                    //Debug.Log(JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text).frame);
                     poseRequest.index += 1;
                     UIManager.Instancce.UpdateProgressBar(receivedJson.frame/totalFrames);
                 }
@@ -596,7 +597,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                         break;
                     PoseJson receivedJson = JsonUtility.FromJson<PoseJson>(webRequest.downloadHandler.text);
                     poseJsons.Add(receivedJson);
-                    Debug.Log(JsonUtility.FromJson<PoseJson>(webRequest.downloadHandler.text).frame);
+                    //Debug.Log(JsonUtility.FromJson<PoseJson>(webRequest.downloadHandler.text).frame);
                     poseRequest.index += 1;
                     UIManager.Instancce.UpdateProgressBar(receivedJson.frame/totalFrames);
                 }
@@ -750,7 +751,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                         FullPoseJson receivedJson = JsonUtility.FromJson<FullPoseJson>(webRequest.downloadHandler.text);
                         bodyJsons.Add(receivedJson.bodyPose);
                         handJsons.Add(receivedJson.handsPose);
-                        Debug.Log(JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text).frame);
+                        //Debug.Log(JsonUtility.FromJson<HandJson>(webRequest.downloadHandler.text).frame);
                         poseRequest.index += 1;
                         UIManager.Instancce.UpdateProgressBar(receivedJson.frame / totalFrames);
                     }
@@ -781,7 +782,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     //getting GauGan image from the server
     IEnumerator GetGauGanImage(string serverResponse)
     {
-        Debug.Log(serverResponse);
+        //Debug.Log(serverResponse);
         yield break;
     }
 }

@@ -228,12 +228,18 @@ public class UIManager : MonoSingleton<UIManager>
     
     public void OnFullPoseDataReceived()
     {
-        #if !UNITY_WEBGL && UNITY_EDITOR
+#if !UNITY_WEBGL && UNITY_EDITOR
             if (string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
             {
                 ShowSuccessMessage("Full pose data downloaded successfully!");
             }
-        #endif
+#endif
+        Debug.Log("WEB GL INPUT CAPTURE DISABLED POSE3DMAPER ____________: ");
+#if !UNITY_EDITOR && UNITY_WEBGL
+            // disable WebGLInput.captureAllKeyboardInput so elements in web page can handle keyboard inputs
+            WebGLInput.captureAllKeyboardInput = false;
+            Debug.Log("captureAllKeyboardInput ____________: ");
+#endif
         handPoseUploadCircleImage.color = successDownloadColor;
         poseUploadCircleImage.color = successDownloadColor;
         handPoseUploadCompleteImage.gameObject.SetActive(true);

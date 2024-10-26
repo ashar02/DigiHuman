@@ -198,6 +198,7 @@ public class HandsPreprocessor : CharacterMapper
             JointPoint indexFingerFirst = hand[(int) HandPoints.IndexFingerFirst];
             JointPoint wrist = hand[(int) HandPoints.Wrist];
             JointPoint pinkyFirstLandmark = hand[(int) HandPoints.PinkyFirst];
+            JointPoint middleFingerFirstLandmark = hand[(int)HandPoints.MiddleFingerFirst];
             Vector3 forwardFinger = wrist.FilteredPos
                 .TriangleNormal(indexFingerFirst.FilteredPos,pinkyFirstLandmark.FilteredPos);
 
@@ -207,19 +208,37 @@ public class HandsPreprocessor : CharacterMapper
             Vector3 normal = wrist.LandmarkPose.TriangleNormal(indexFingerFirst.LandmarkPose,pinkyFirstLandmark.LandmarkPose);
             hand[(int) HandPoints.Wrist].Transform.rotation = Quaternion.LookRotation(-wrist.LandmarkPose + (indexFingerFirst.LandmarkPose + pinkyFirstLandmark.LandmarkPose)/2.0f, normal) * wrist.InverseRotation;
 
-            //Method2
-            // Vector3 normal = wrist.WorldPos.TriangleNormal(indexFingerFirst.WorldPos,pinkyFirstLandmark.WorldPos);
-            // hand[(int) HandPoints.Wrist].Transform.rotation = Quaternion.LookRotation(-wrist.WorldPos + (indexFingerFirst.WorldPos + pinkyFirstLandmark.WorldPos)/2.0f, normal) * wrist.InverseRotation;
-            //
+        //Method2
+        // Vector3 normal = wrist.WorldPos.TriangleNormal(indexFingerFirst.WorldPos,pinkyFirstLandmark.WorldPos);
+        // hand[(int) HandPoints.Wrist].Transform.rotation = Quaternion.LookRotation(-wrist.WorldPos + (indexFingerFirst.WorldPos + pinkyFirstLandmark.WorldPos)/2.0f, normal) * wrist.InverseRotation;
+        //
 
-            //Method3
-            // Vector3 normal = wrist.FilteredPos.TriangleNormal(indexFingerFirst.FilteredPos,pinkyFirstLandmark.FilteredPos);
-            // hand[(int) HandPoints.Wrist].Transform.rotation = Quaternion.LookRotation(wrist.FilteredPos - (indexFingerFirst.FilteredPos + pinkyFirstLandmark.FilteredPos)/2.0f, normal) * wrist.InverseRotation;
-            //
+        //Method3
+        // Vector3 normal = wrist.FilteredPos.TriangleNormal(indexFingerFirst.FilteredPos,pinkyFirstLandmark.FilteredPos);
+        // hand[(int) HandPoints.Wrist].Transform.rotation = Quaternion.LookRotation(wrist.FilteredPos - (indexFingerFirst.FilteredPos + pinkyFirstLandmark.FilteredPos)/2.0f, normal) * wrist.InverseRotation;
+        //
 
-            
+
         //rotation
-        
+        // Define a threshold to determine if the palm is facing front or back
+        float palmFacingThreshold = 0f;
+
+        // Compute the palm normal based on wrist and finger positions (same as before)
+        Vector3 palmNormal = wrist.LandmarkPose.TriangleNormal(indexFingerFirst.LandmarkPose, pinkyFirstLandmark.LandmarkPose);
+
+        // Determine palm facing direction using wrist and middle finger or palm center
+        Vector3 palmDirection = middleFingerFirstLandmark.LandmarkPose - wrist.LandmarkPose;
+
+        // Check if the palm is facing front or back by projecting the palmDirection on the palm normal
+        // If the dot product is positive, the palm is facing towards the observer (front); if negative, it's facing back
+        bool isPalmFacingFront = Vector3.Dot(palmNormal, palmDirection) > palmFacingThreshold;
+
+        // If the palm is facing back, invert the palm normal to ensure consistent finger bending direction
+        //if (isPalmFacingFront)
+        //{
+        //    palmNormal = -palmNormal;
+        //}
+
         for (int i = 0; i < hand.Length; i++)
         {
             
@@ -261,9 +280,17 @@ public class HandsPreprocessor : CharacterMapper
                     //
                     // 1'
                     // bone.Transform.rotation = Quaternion.LookRotation(bone.Transform.position- bone.Child.Transform.position, (forwardFinger + bone.Parent.Transform.right)/2.0f) * bone.InverseRotation;
-                    
-                    bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos- bone.Child.FilteredPos, forwardFinger) * bone.InverseRotation;
-                    
+
+                    //bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos- bone.Child.FilteredPos, forwardFinger) * bone.InverseRotation;
+                    if (i == 6 || i == 10 || i == 14 || i == 18 )
+                    {
+                        bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos - bone.Child.FilteredPos, palmNormal) * bone.InverseRotation;
+                    }
+                    else
+                    {
+                        bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos - bone.Child.FilteredPos, forwardFinger) * bone.InverseRotation;
+                    }
+
                     //2
                     // bone.Transform.rotation = Quaternion.LookRotation(bone.Transform.position- bone.Child.Transform.position, forwardFinger) 
                     //                           * Quaternion.LookRotation(bone.Transform.position- bone.Child.Transform.position, fv)
@@ -304,8 +331,15 @@ public class HandsPreprocessor : CharacterMapper
                 //Method3
                 // bone.Transform.rotation = Quaternion.LookRotation(bone.Transform.position- bone.Child.Transform.position, (wrist.Transform.position - bone.Transform.position)) * bone.InverseRotation;
                 //Method4
-                bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos- bone.Child.FilteredPos, forwardFinger) * bone.InverseRotation;
-
+                //bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos- bone.Child.FilteredPos, forwardFinger) * bone.InverseRotation;
+                if (i == 6 || i == 10 || i == 14 || i == 18)
+                {
+                    bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos - bone.Child.FilteredPos, palmNormal) * bone.InverseRotation;
+                }
+                else
+                {
+                    bone.Transform.rotation = Quaternion.LookRotation(bone.FilteredPos - bone.Child.FilteredPos, forwardFinger) * bone.InverseRotation;
+                }
             }
             /*
             if (bone.Parent != null)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Video;
 using Random = UnityEngine.Random;
 
 public class NetworkManager : MonoSingleton<NetworkManager>
@@ -86,6 +87,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineBaseUrl = "";
     [SerializeField] public int commandLineCharacter = 0;
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
+    [SerializeField] public float commandLineNextFrameTime;// = // 1/120 = 0.00833f
 
     private void Start()
     {
@@ -99,6 +101,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
         //commandLineBaseUrl = "https://translate.deaftawk.com:3001/";
         //commandLineCharacter = 1;
+        //commandLineNextFrameTime = 0.0833f;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -124,6 +127,13 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 if (int.TryParse(commandLineArg, out int character))
                 {
                     commandLineCharacter = character;
+                }
+            }
+            else if (args[index] == "-nextFrameTime" && (index + 1) < args.Length) {
+                string commandLineArg = args[index + 1];
+                if (float.TryParse(commandLineArg, out float nextFrameTime))
+                {
+                    commandLineNextFrameTime = nextFrameTime;
                 }
             }
         }
@@ -771,6 +781,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         yield return null;
         frameReader.SetHandPoseList(handJsons);
         frameReader.SetPoseList(bodyJsons);
+        frameReader.nextFrameTime = commandLineNextFrameTime;
         UIManager.Instancce.OnFullPoseDataReceived();
 
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar,false);

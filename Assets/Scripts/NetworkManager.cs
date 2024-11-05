@@ -56,6 +56,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public string text;
         public int character;
         public string baseUrl;
+        public float nextFrameTime;
     }
 
     [Serializable] 
@@ -87,7 +88,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineBaseUrl = "";
     [SerializeField] public int commandLineCharacter = 0;
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
-    [SerializeField] public float commandLineNextFrameTime;// = // 1/120 = 0.00833f
+    [SerializeField] public float commandLineNextFrameTime = 0.00833f; // 1/120 = 0.00833f
 
     private void Start()
     {
@@ -137,7 +138,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
             }
         }
-        #if !UNITY_WEBGL
+#if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
@@ -152,6 +153,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, apiType, (response, bytes) =>
                 {
+                    this.frameReader.nextFrameTime = commandLineNextFrameTime;
                     if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
                     {
                         this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]));
@@ -160,9 +162,9 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
                 }));
             }
-        #endif
-        #if UNITY_EDITOR
-            if (enableDebug)
+#endif
+#if UNITY_EDITOR
+        if (enableDebug)
             {
                 StartCoroutine(Upload(filePath, serverFullPoseUploadURL, (response, bytes) =>
                 {
@@ -204,6 +206,11 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
             {
+                if (webData.nextFrameTime > 0)
+                {
+                    commandLineNextFrameTime = webData.nextFrameTime;
+                }
+                this.frameReader.nextFrameTime = commandLineNextFrameTime;
                 commandLineCharacter = webData.character;
                 if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
                 {
@@ -781,7 +788,6 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         yield return null;
         frameReader.SetHandPoseList(handJsons);
         frameReader.SetPoseList(bodyJsons);
-        frameReader.nextFrameTime = commandLineNextFrameTime;
         UIManager.Instancce.OnFullPoseDataReceived();
 
         UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar,false);

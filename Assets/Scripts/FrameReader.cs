@@ -111,7 +111,7 @@ public class FrameReader : MonoBehaviour
     private float videoFractionZ = 1;
     
     [Header("Frame rate")]
-    [SerializeField] private float nextFrameTime;
+    [SerializeField] public float nextFrameTime;
 
     private int currentAnimationSlot = 0;
     

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Video;
 using Random = UnityEngine.Random;
 
 public class NetworkManager : MonoSingleton<NetworkManager>
@@ -55,6 +56,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public string text;
         public int character;
         public string baseUrl;
+        public float nextFrameTime;
     }
 
     [Serializable] 
@@ -86,6 +88,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineBaseUrl = "";
     [SerializeField] public int commandLineCharacter = 0;
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
+    [SerializeField] public float commandLineNextFrameTime = 0.00833f; // 1/120 = 0.00833f
 
     private void Start()
     {
@@ -99,6 +102,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
         //commandLineBaseUrl = "https://translate.deaftawk.com:3001/";
         //commandLineCharacter = 1;
+        //commandLineNextFrameTime = 0.0833f;
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -126,8 +130,15 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     commandLineCharacter = character;
                 }
             }
+            else if (args[index] == "-nextFrameTime" && (index + 1) < args.Length) {
+                string commandLineArg = args[index + 1];
+                if (float.TryParse(commandLineArg, out float nextFrameTime))
+                {
+                    commandLineNextFrameTime = nextFrameTime;
+                }
+            }
         }
-        #if !UNITY_WEBGL
+#if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
@@ -142,6 +153,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, apiType, (response, bytes) =>
                 {
+                    this.frameReader.nextFrameTime = commandLineNextFrameTime;
                     if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
                     {
                         this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]));
@@ -150,9 +162,9 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
                 }));
             }
-        #endif
-        #if UNITY_EDITOR
-            if (enableDebug)
+#endif
+#if UNITY_EDITOR
+        if (enableDebug)
             {
                 StartCoroutine(Upload(filePath, serverFullPoseUploadURL, (response, bytes) =>
                 {
@@ -194,6 +206,11 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
             {
+                if (webData.nextFrameTime > 0)
+                {
+                    commandLineNextFrameTime = webData.nextFrameTime;
+                }
+                this.frameReader.nextFrameTime = commandLineNextFrameTime;
                 commandLineCharacter = webData.character;
                 if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
                 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Runtime.InteropServices;
 
 
 public enum WaitingModeUI
@@ -64,7 +65,9 @@ public class UIManager : MonoSingleton<UIManager>
     [Header("Messages")] 
     [SerializeField] private GameObject errorPanel;
     [SerializeField] private GameObject successPanel;
-    
+
+    [DllImport("__Internal")]
+    private static extern void sendMessageToWeb(string message);
 
     public void UpdateProgressBar(float percent)
     {
@@ -245,15 +248,18 @@ public class UIManager : MonoSingleton<UIManager>
         handPoseUploadCompleteImage.gameObject.SetActive(true);
         poseUploadCompleteImage.gameObject.SetActive(true);
         frameReader.ArrangeDataFrames();
-        #if UNITY_WEBGL && !UNITY_EDITOR
-            Application.ExternalCall("onDataRecieved", "Hello from Unity, I received your message");
+#if UNITY_WEBGL && !UNITY_EDITOR
+            string message = "Hello from Unity, I received your message";
+             Debug.Log("SENDING MESSAGE BACK TO WEB------");
+            //Application.ExternalCall("onDataRecieved", message);
+            sendMessageToWeb(message);
             frameReader.OnTogglePlay();
             if (frameReader.pause)
                 animationPlayButton.image.sprite = resumeImage;
             else
                 animationPlayButton.image.sprite = pauseImage;
             canvas.gameObject.SetActive(false);
-        #endif
+#endif
         if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
         {
             frameReader.OnTogglePlay();

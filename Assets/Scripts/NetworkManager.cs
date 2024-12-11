@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Video;
 using Random = UnityEngine.Random;
+using System.Runtime.InteropServices;
 
 public class NetworkManager : MonoSingleton<NetworkManager>
 {
@@ -22,8 +23,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] private string serverHandPoseEstimatorURL;
 
     [SerializeField] private string serverFaceUploadURL;
-    [SerializeField] private string serverFaceMocapURL; 
+    [SerializeField] private string serverFaceMocapURL;
 
+    [DllImport("__Internal")]
+    private static extern void sendErrorToWeb(string message);
 
     [Header("Dependencies")] 
     [SerializeField] private FrameReader frameReader;
@@ -317,7 +320,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             Debug.Log(www.error);
             #if !UNITY_EDITOR
                 #if UNITY_WEBGL
-                    Application.ExternalCall("onDataRecieved", "Server Connection Failed!");
+                    //Application.ExternalCall("onDataRecieved", "Server Connection Failed!");
+                    sendErrorToWeb("Server Connection Failed!");
                 #endif
                 if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
                 {
@@ -680,7 +684,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 UIManager.Instancce.CheckAndEnableWaitingModeUI(WaitingModeUI.ProgressBar, false);
                 #if !UNITY_EDITOR
                     #if UNITY_WEBGL
-                        Application.ExternalCall("onDataRecieved", "Failed in downloading Full Body Pose Data!");
+                        //Application.ExternalCall("onDataRecieved", "Failed in downloading Full Body Pose Data!");
+                        sendErrorToWeb("Failed in downloading Full Body Pose Data!");
                     #endif
                     if (!string.IsNullOrEmpty(NetworkManager.Instancce.commandLineText))
                     {

@@ -60,6 +60,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public int character;
         public string baseUrl;
         public float nextFrameTime;
+        public string apiKey;
     }
 
     [Serializable] 
@@ -206,6 +207,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     webData.baseUrl = webData.baseUrl.TrimEnd('/');
                 }
                 serverFullPoseUploadURL = webData.baseUrl + pathAndQuery;
+                if (!string.IsNullOrEmpty(webData.apiKey))
+                {
+                    if (!serverFullPoseUploadURL.Contains("?"))
+                    {
+                        serverFullPoseUploadURL += $"?apikey={webData.apiKey}";
+                    }
+                    else
+                    {
+                        serverFullPoseUploadURL += $"&apikey={webData.apiKey}";
+                    }
+                }
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
             {

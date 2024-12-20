@@ -90,6 +90,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineOutput = "";
     [SerializeField] public string commandLineFFMPEG = "";
     [SerializeField] public string commandLineBaseUrl = "";
+    [SerializeField] public string commandLineApiKey = "";
     [SerializeField] public int commandLineCharacter = 0;
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
     [SerializeField] public float commandLineNextFrameTime = 0.00833f; // 1/120 = 0.00833f
@@ -126,6 +127,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 commandLineBaseUrl = args[index + 1];
             }
+            else if (args[index] == "-apiKey" && (index + 1) < args.Length)
+            {
+                commandLineApiKey = args[index + 1];
+            }
             else if (args[index] == "-character" && (index + 1) < args.Length)
             {
                 string commandLineArg = args[index + 1];
@@ -152,6 +157,17 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     commandLineBaseUrl = commandLineBaseUrl.TrimEnd('/');
                 }
                 serverFullPoseUploadURL = commandLineBaseUrl + pathAndQuery;
+                if (!string.IsNullOrEmpty(commandLineApiKey))
+                {
+                    if (!serverFullPoseUploadURL.Contains("?"))
+                    {
+                        serverFullPoseUploadURL += $"?apikey={commandLineApiKey}";
+                    }
+                    else
+                    {
+                        serverFullPoseUploadURL += $"&apikey={commandLineApiKey}";
+                    }
+                }
             }
             if (!string.IsNullOrEmpty(commandLineText))
             {

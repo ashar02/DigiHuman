@@ -157,21 +157,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     commandLineBaseUrl = commandLineBaseUrl.TrimEnd('/');
                 }
                 serverFullPoseUploadURL = commandLineBaseUrl + pathAndQuery;
-                if (!string.IsNullOrEmpty(commandLineApiKey))
-                {
-                    if (!serverFullPoseUploadURL.Contains("?"))
-                    {
-                        serverFullPoseUploadURL += $"?apikey={commandLineApiKey}";
-                    }
-                    else
-                    {
-                        serverFullPoseUploadURL += $"&apikey={commandLineApiKey}";
-                    }
-                }
             }
             if (!string.IsNullOrEmpty(commandLineText))
             {
-                StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, apiType, (response, bytes) =>
+                StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, commandLineApiKey, apiType, (response, bytes) =>
                 {
                     this.frameReader.nextFrameTime = commandLineNextFrameTime;
                     if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
@@ -223,19 +212,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     webData.baseUrl = webData.baseUrl.TrimEnd('/');
                 }
                 serverFullPoseUploadURL = webData.baseUrl + pathAndQuery;
-                if (!string.IsNullOrEmpty(webData.apiKey))
-                {
-                    if (!serverFullPoseUploadURL.Contains("?"))
-                    {
-                        serverFullPoseUploadURL += $"?apikey={webData.apiKey}";
-                    }
-                    else
-                    {
-                        serverFullPoseUploadURL += $"&apikey={webData.apiKey}";
-                    }
-                }
             }
-            StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, apiType, (response, bytes) =>
+            StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, webData.apiKey, apiType, (response, bytes) =>
             {
                 if (webData.nextFrameTime > 0)
                 {
@@ -256,7 +234,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     //starting coroutine for sending ASync to server
     public void UploadAndEstimateFullPoseUsingText(string text, Action onSuccess = null)
     {
-        StartCoroutine(UploadText(text, serverFullPoseUploadURL, apiType, (response, bytes) =>
+        StartCoroutine(UploadText(text, serverFullPoseUploadURL, "", apiType, (response, bytes) =>
         {
             StartCoroutine(GetFullBodyPoseEstimates(response, bytes));
             onSuccess?.Invoke();
@@ -320,7 +298,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     
     
     //Async file uploader method2
-    IEnumerator UploadText(string text, string url, int type, Action<UploadResponse, byte[]> onFinishedUpload)
+    IEnumerator UploadText(string text, string url, string apiKey, int type, Action<UploadResponse, byte[]> onFinishedUpload)
     {
         UnityWebRequest www;
         if (type == -2)
@@ -330,6 +308,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             string newApiEndpoint = "/spoken_text_to_signed_pose";
             string fullUrl = baseUrl + newApiEndpoint;
             string queryParams = $"?text={UnityWebRequest.EscapeURL(text)}&spoken=en&signed=ase&myown=4&spell=true";
+            if (!string.IsNullOrEmpty(apiKey))
+            {
+                queryParams += $"&apikey={apiKey}";
+            }
             fullUrl += queryParams;
             www = UnityWebRequest.Get(fullUrl);
         } else

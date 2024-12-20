@@ -1,6 +1,9 @@
 mergeInto(LibraryManager.library, {
 
   sendMessageToWeb: function (message) {
-    onDataRecieved();
+    onDataRecieved(message);
   },
+  sendErrorToWeb: function (message) {
+    handleWebglError(message);
+  }
 })

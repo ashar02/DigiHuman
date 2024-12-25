@@ -69,6 +69,10 @@ public class UIManager : MonoSingleton<UIManager>
     [DllImport("__Internal")]
     private static extern void sendMessageToWeb(string message);
 
+    public void SetCanvasActive(bool active)
+    {
+        canvas.gameObject.SetActive(active);
+    }
     public void UpdateProgressBar(float percent)
     {
         progressBarImage.fillAmount = percent;

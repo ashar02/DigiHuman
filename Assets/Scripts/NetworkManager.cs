@@ -147,7 +147,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 }
             }
         }
-#if !UNITY_WEBGL
+        #if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
@@ -160,6 +160,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             }
             if (!string.IsNullOrEmpty(commandLineText))
             {
+                UIManager.Instancce.SetCanvasActive(false);
                 StartCoroutine(UploadText(commandLineText, serverFullPoseUploadURL, commandLineApiKey, apiType, (response, bytes) =>
                 {
                     this.frameReader.nextFrameTime = commandLineNextFrameTime;
@@ -171,8 +172,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
                 }));
             }
-#endif
-#if UNITY_EDITOR
+        #endif
+        #if UNITY_EDITOR
         if (enableDebug)
             {
                 StartCoroutine(Upload(filePath, serverFullPoseUploadURL, (response, bytes) =>
@@ -200,6 +201,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     {
         Debug.Log("Pose text recieved from angular ____________: ");
         Debug.Log(data);
+        UIManager.Instancce.SetCanvasActive(false);
         WebDataObject webData = JsonUtility.FromJson<WebDataObject>(data);
         if (!string.IsNullOrEmpty(webData.text))
         {

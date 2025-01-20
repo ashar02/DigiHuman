@@ -91,9 +91,24 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineFFMPEG = "";
     [SerializeField] public string commandLineBaseUrl = "";
     [SerializeField] public string commandLineApiKey = "";
+    [SerializeField] public string commandLineBackgroundColor = "#F5F5F5";
     [SerializeField] public int commandLineCharacter = 0;
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
     [SerializeField] public float commandLineNextFrameTime = 0.00833f; // 1/120 = 0.00833f
+
+    private void SetBackgroundColor() // This method should be called in Start() after parsing command line arguments
+    {
+        Color color;
+        if (!string.IsNullOrEmpty(commandLineBackgroundColor) && ColorUtility.TryParseHtmlString(commandLineBackgroundColor, out color))
+        {
+            Camera.main.backgroundColor = color;
+        }
+        else
+        {
+            ColorUtility.TryParseHtmlString("#F5F5F5", out color);
+            Camera.main.backgroundColor = color;
+        }
+    }
 
     private void Start()
     {
@@ -146,7 +161,12 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     commandLineNextFrameTime = nextFrameTime;
                 }
             }
+            else if (args[index] == "-backgroundColor" && (index + 1) < args.Length)
+            {
+                commandLineBackgroundColor = args[index + 1];
+            }
         }
+        SetBackgroundColor();
         #if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
@@ -214,6 +234,11 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     webData.baseUrl = webData.baseUrl.TrimEnd('/');
                 }
                 serverFullPoseUploadURL = webData.baseUrl + pathAndQuery;
+            }
+            if (!string.IsNullOrEmpty(webData.backgroundColor))
+            {
+                commandLineBackgroundColor = webData.backgroundColor;
+                SetBackgroundColor();
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, webData.apiKey, apiType, (response, bytes) =>
             {

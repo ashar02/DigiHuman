@@ -61,6 +61,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public string baseUrl;
         public float nextFrameTime;
         public string apiKey;
+        public string backgroundColor;
     }
 
     [Serializable] 

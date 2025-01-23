@@ -893,6 +893,54 @@ public class FrameReader : MonoBehaviour
         HideCharacter();
     }
 
+    public void SetNewCharacter(GameObject newCharacter, string commandLineCharacterClothColor)
+    {
+      
+        character.SetActive(false);
+        character = newCharacter;
+        SetCharacterClothColor(newCharacter, commandLineCharacterClothColor);
+        pose3DMapper.SetCharacter(character);
+        try
+        {
+            enableHands = true;
+            handPose.SetCharacter(character);
+        }
+        catch (Exception e)
+        {
+            enableHands = false;
+            Console.WriteLine(e);
+        }
+        if (character.GetComponentInChildren<BlendShapeController>() != null)
+        {
+            facialExpressionHandler.SetCharacter(newCharacter);
+            enableFace = true;
+        }
+        else
+        {
+            enableFace = false;
+        }
+
+        characterRotation = character.transform.rotation;
+        HideCharacter();
+    }
+
+    public void SetCharacterClothColor(GameObject character, string commandLineCharacterClothColor) {
+        if (!string.IsNullOrEmpty(commandLineCharacterClothColor)) {
+            Color newColor;
+            if (ColorUtility.TryParseHtmlString(commandLineCharacterClothColor, out newColor)) {
+                // Find the character's material and update its color
+                SkinnedMeshRenderer[] meshRenderers = character.GetComponentsInChildren<SkinnedMeshRenderer>();
+                foreach (SkinnedMeshRenderer renderer in meshRenderers) {
+                    if (renderer.name.ToLower().Contains("suit") || 
+                        renderer.name.ToLower().Contains("tie") ||
+                        renderer.name.ToLower().Contains("pants")) {
+                        renderer.material.color = newColor;
+                    }
+                }
+            }
+        }
+    }
+
     private void MakeSceneReady()
     {
         framesLoaded = true;

@@ -94,6 +94,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineApiKey = "";
     [SerializeField] public string commandLineBackgroundColor = "#F5F5F5";
     [SerializeField] public int commandLineCharacter = 0;
+    [SerializeField] public string commandLineCharacterClothColor = "#000000";
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
     [SerializeField] public float commandLineNextFrameTime = 0.00833f; // 1/120 = 0.00833f
 
@@ -166,8 +167,14 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 commandLineBackgroundColor = args[index + 1];
             }
+            else if (args[index] == "-characterClothColor" && (index + 1) < args.Length)
+            {
+                commandLineCharacterClothColor = args[index + 1];
+            }
         }
         SetBackgroundColor();
+        this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]), commandLineCharacterClothColor);
+        this.frameReader.ShowCharacter();
         #if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
@@ -251,7 +258,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                 commandLineCharacter = webData.character;
                 if (commandLineCharacter >= 0 && commandLineCharacter < this.nodes.Count)
                 {
-                    this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]));
+                    this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]), commandLineCharacterClothColor);
                     this.frameReader.ShowCharacter();
                 }
                 StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));

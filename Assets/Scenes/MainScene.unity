@@ -13767,7 +13767,10 @@ MonoBehaviour:
   commandLineOutput: 
   commandLineFFMPEG: 
   commandLineBaseUrl: 
+  commandLineApiKey: 
+  commandLineBackgroundColor: '#F5F5F5'
   commandLineCharacter: 0
+  commandLineCharacterClothColor: '#000000'
   apiType: -2
   commandLineNextFrameTime: 0.0222
 --- !u!4 &203192803
@@ -85603,6 +85606,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7489406144317743193, guid: e6346310eb55e3e42bc1b2728bf99479, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e6346310eb55e3e42bc1b2728bf99479, type: 3}
       propertyPath: m_Name
       value: Ch33_nonPBR
@@ -85611,6 +85618,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2671357777809745069, guid: e6346310eb55e3e42bc1b2728bf99479, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: e6346310eb55e3e42bc1b2728bf99479, type: 3}
       propertyPath: m_Controller
       value: 
@@ -85618,6 +85629,10 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: e6346310eb55e3e42bc1b2728bf99479, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7179952766287911660, guid: e6346310eb55e3e42bc1b2728bf99479, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 400178, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
       propertyPath: m_LocalPosition.x
@@ -126008,7 +126023,7 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 0
+  m_HDR: 1
   m_AllowMSAA: 1
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0

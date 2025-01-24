@@ -62,6 +62,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public float nextFrameTime;
         public string apiKey;
         public string backgroundColor;
+        public string characterClothColor;
     }
 
     [Serializable] 
@@ -247,6 +248,10 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             {
                 commandLineBackgroundColor = webData.backgroundColor;
                 SetBackgroundColor();
+            }
+            if (!string.IsNullOrEmpty(webData.characterClothColor))
+            {
+                commandLineCharacterClothColor = webData.characterClothColor;
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, webData.apiKey, apiType, (response, bytes) =>
             {

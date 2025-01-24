@@ -908,7 +908,12 @@ public class FrameReader : MonoBehaviour
                 foreach (SkinnedMeshRenderer renderer in meshRenderers) {
                     if (renderer.name.ToLower().Contains("suit") || 
                         renderer.name.ToLower().Contains("tie") ||
-                        renderer.name.ToLower().Contains("pants")) {
+                        renderer.name.ToLower().Contains("pants") ||
+                        renderer.name.ToLower().Contains("tops") ||
+                        renderer.name.ToLower().Contains("bottoms") || 
+                        renderer.name.ToLower().Contains("leg") ||
+                        renderer.name.ToLower().Contains("shirts") ||
+                        renderer.name.ToLower().Contains("uwagi")) {
                         renderer.material.color = color;
                     }
                 }

@@ -865,40 +865,15 @@ public class FrameReader : MonoBehaviour
 
     public void SetNewCharacter(GameObject newCharacter)
     {
-      
-        character.SetActive(false);
-        character = newCharacter;
-        pose3DMapper.SetCharacter(character);
-        try
-        {
-            enableHands = true;
-            handPose.SetCharacter(character);
-        }
-        catch (Exception e)
-        {
-            enableHands = false;
-            Console.WriteLine(e);
-        }
-        if (character.GetComponentInChildren<BlendShapeController>() != null)
-        {
-            facialExpressionHandler.SetCharacter(newCharacter);
-            enableFace = true;
-        }
-        else
-        {
-            enableFace = false;
-        }
-
-        characterRotation = character.transform.rotation;
-        HideCharacter();
+        SetNewCharacter(newCharacter, "#000000");
     }
 
-    public void SetNewCharacter(GameObject newCharacter, string commandLineCharacterClothColor)
+    public void SetNewCharacter(GameObject newCharacter, string characterClothColor)
     {
       
         character.SetActive(false);
         character = newCharacter;
-        SetCharacterClothColor(newCharacter, commandLineCharacterClothColor);
+        SetCharacterClothColor(newCharacter, characterClothColor);
         pose3DMapper.SetCharacter(character);
         try
         {
@@ -924,17 +899,17 @@ public class FrameReader : MonoBehaviour
         HideCharacter();
     }
 
-    public void SetCharacterClothColor(GameObject character, string commandLineCharacterClothColor) {
-        if (!string.IsNullOrEmpty(commandLineCharacterClothColor)) {
-            Color newColor;
-            if (ColorUtility.TryParseHtmlString(commandLineCharacterClothColor, out newColor)) {
+    public void SetCharacterClothColor(GameObject character, string characterClothColor) {
+        if (!string.IsNullOrEmpty(characterClothColor)) {
+            Color color;
+            if (ColorUtility.TryParseHtmlString(characterClothColor, out color)) {
                 // Find the character's material and update its color
                 SkinnedMeshRenderer[] meshRenderers = character.GetComponentsInChildren<SkinnedMeshRenderer>();
                 foreach (SkinnedMeshRenderer renderer in meshRenderers) {
                     if (renderer.name.ToLower().Contains("suit") || 
                         renderer.name.ToLower().Contains("tie") ||
                         renderer.name.ToLower().Contains("pants")) {
-                        renderer.material.color = newColor;
+                        renderer.material.color = color;
                     }
                 }
             }

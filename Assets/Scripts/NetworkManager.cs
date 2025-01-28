@@ -120,12 +120,13 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             WebGLInput.captureAllKeyboardInput = false;
             Debug.Log("captureAllKeyboardInput ____________: ");
         #endif
-        //commandLineText = "hello how";
+        commandLineText = "hello how";
         //commandLineOutput = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/temp/test1.mp4";
         //commandLineFFMPEG = "/Users/ashar/Desktop/repo/spoken-to-signed-translation/unity3d/mac/ffmpeg";
-        //commandLineBaseUrl = "https://translate.deaftawk.com:3001/";
+        commandLineBaseUrl = "https://translateai.deaftawk.com:3001/";
         //commandLineCharacter = 1;
         //commandLineNextFrameTime = 0.0833f;
+        commandLineApiKey = "893bc790d5fa33a4aea237b54b8226d8-678907f2f2710732f532b56bfc9f0bb8";
         string[] args = System.Environment.GetCommandLineArgs();
         for (int index = 0; index < args.Length; index++)
         {
@@ -176,7 +177,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         SetBackgroundColor();
         this.frameReader.SetNewCharacter(Instantiate(this.nodes[commandLineCharacter]), commandLineCharacterClothColor);
         this.frameReader.ShowCharacter();
-        #if !UNITY_WEBGL
+        //#if !UNITY_WEBGL
             if (!string.IsNullOrEmpty(commandLineBaseUrl))
             {
                 Uri baseUri = new Uri(serverFullPoseUploadURL);
@@ -201,7 +202,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
                     StartCoroutine(GetFullBodyPoseEstimates(response, bytes, apiType));
                 }));
             }
-        #endif
+        //#endif
         #if UNITY_EDITOR
         if (enableDebug)
             {

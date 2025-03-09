@@ -63,6 +63,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
         public string apiKey;
         public string backgroundColor;
         public string characterClothColor;
+        public string language;
     }
 
     [Serializable] 
@@ -98,6 +99,8 @@ public class NetworkManager : MonoSingleton<NetworkManager>
     [SerializeField] public string commandLineCharacterClothColor = "#000000";
     [SerializeField] public int apiType = -2; //-1: orignal api call; -2: our own api call
     [SerializeField] public float commandLineNextFrameTime = 0.00833f; // 1/120 = 0.00833f
+    [SerializeField] public string commandLineSpoken = "en";
+    [SerializeField] public string commandLineSigned = "ase";
 
     private void SetBackgroundColor() // This method should be called in Start() after parsing command line arguments
     {
@@ -172,6 +175,15 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             else if (args[index] == "-characterClothColor" && (index + 1) < args.Length)
             {
                 commandLineCharacterClothColor = args[index + 1];
+            }
+            else if (args[index] == "-language" && (index + 1) < args.Length)
+            {
+                string commandLineArg = args[index + 1];
+                if (string.Equals(commandLineArg, "da", StringComparison.OrdinalIgnoreCase))
+                {
+                    commandLineSpoken = "da";
+                    commandLineSigned = "dsl";
+                }
             }
         }
         SetBackgroundColor();
@@ -253,6 +265,14 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             if (!string.IsNullOrEmpty(webData.characterClothColor))
             {
                 commandLineCharacterClothColor = webData.characterClothColor;
+            }
+            if (!string.IsNullOrEmpty(webData.language))
+            {
+                if (string.Equals(webData.language, "da", StringComparison.OrdinalIgnoreCase))
+                {
+                    commandLineSpoken = "da";
+                    commandLineSigned = "dsl";
+                }
             }
             StartCoroutine(UploadText(webData.text, serverFullPoseUploadURL, webData.apiKey, apiType, (response, bytes) =>
             {
@@ -348,7 +368,7 @@ public class NetworkManager : MonoSingleton<NetworkManager>
             string baseUrl = baseUri.Port > 0 ? $"{baseUri.Scheme}://{baseUri.Host}:{baseUri.Port}" : $"{baseUri.Scheme}://{baseUri.Host}";
             string newApiEndpoint = "/spoken_text_to_signed_pose";
             string fullUrl = baseUrl + newApiEndpoint;
-            string queryParams = $"?text={UnityWebRequest.EscapeURL(text)}&spoken=en&signed=ase&myown=4&spell=true";
+            string queryParams = $"?text={UnityWebRequest.EscapeURL(text)}&spoken={commandLineSpoken}&signed={commandLineSigned}&myown=4&spell=true";
             if (!string.IsNullOrEmpty(apiKey))
             {
                 queryParams += $"&apikey={apiKey}";
